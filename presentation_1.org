@@ -1,6 +1,10 @@
 #+TITLE: Lambda Calculus 1
 #+AUTHOR: Sven Tennie
 #+EMAIL: sven.tennie@dreamit.de
+#+KEYWORDS: "Simply Typed Lambda Calculus" "Church Encoding" "Currying"
+#+LANGUAGE:  en
+#+OPTIONS: tasks:nil toc:nil
+
 #+startup: beamer
 #+LaTeX_CLASS: beamer
 
@@ -52,35 +56,44 @@ t ::=& \ x & \text{Variable} \\
 \to y
 \end{equation*}
 
+* Evaluation / Reduction
+\begin{equation*}
+\underbrace{\underbrace{(\underbrace{\lambda x . \underbrace{\lambda y . \underbrace{x \ y}_{Application}}_{Abstraction}}_{Abstraction}) \underbrace{a}_{Variable}}_{Application} \  \underbrace{b}_{Variable}}_{Application}
+\end{equation*}
+#+BEAMER: \pause
+\begin{align*}
+& (\lambda \colorbox{orange!50}{x} . \lambda y . \colorbox{orange!50}{x} \ y) \colorbox{orange!50}{a} b \\
+\onslide<3->{\to & (\lambda \colorbox{cyan!50}{y} . a \ \colorbox{cyan!50}{y}) \colorbox{cyan!50}{b} \\}
+\onslide<4->{\to & a \ b}
+\end{align*}
 
-* More fun with Identity
-- Higher Order Functions
+#+ATTR_BEAMER: :overlay <5->
+- Remarks
+  - Lambda Expressions expand as much to the right as possible
+  - We use parentheses to clearify what's meant
+    - Even though I didn't specify them in the grammar ...
+
+* Higher Order Functions
+- Functions that take or return functions
+  - Are there "by definition"
 
 \begin{equation*}
 \underbrace{
-  \underbrace{\lambda x.x}_\text{Abstraction}
+  \underbrace{\lambda x.x}_{Abstraction}
  \quad
- \underbrace{\lambda y.y}_\text{Abstraction}
-}_\text{Application}
-\to \lambda y.y
+ \underbrace{\lambda y.y}_{Abstraction}
+}_{Application}
+\to \underbrace{\lambda y.y}_{Abstraction}
 \end{equation*}
 
+* Currying
+$(\lambda x . \lambda y . x y) z  \to \lambda y . z y$
 
-#+BEAMER: \pause
-- Let's use parentheses to clearify what we mean...
+- Example
+  - ~(+1)~ Section in Haskell
+$(\lambda x . \lambda y . + x y) 1  \to \lambda y . + 1 y$
 
-\begin{align*}
-& \lambda y . \lambda z . y \ z \ \lambda x.x \\
-\to & ?
-\end{align*}
-
-\begin{align*}
-& (\lambda y . \lambda z . y \ z) (\lambda x.x) \\
- \to & \lambda z . ((\lambda x.x) \ z) \\
- \to & \lambda z . z
-\end{align*}
-
-** TODO How to apply parentheses /exactly/?
+- Partial Application is there "by definition"
 
 * Remarks
 - Everything (Term) is an Expression
@@ -115,15 +128,6 @@ $(\lambda x . (\lambda y . y) \ x) \to_\eta \lambda y . y$
   - x is not free in f
 $(\lambda x . (\lambda y . x) \ x)$
 
-
-* Currying
-$(\lambda x . \lambda y . x y) z  \to \lambda y . z y$
-
-- Example
-  - ~(+1)~ Section in Haskell
-$(\lambda x . \lambda y . + x y) 1  \to \lambda y . + 1 y$
-
-- Partial Application is built-in
 
 * Church Encodings
 
