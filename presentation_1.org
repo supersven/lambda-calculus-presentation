@@ -1,0 +1,268 @@
+#+TITLE: Lambda Calculus 1
+#+AUTHOR: Sven Tennie
+#+EMAIL: sven.tennie@dreamit.de
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+
+* Lambda Calculus
+- Invented by Alonzo Church (1920s)
+- Equally expressive to the Turing Machine(s)
+- Formal Language
+- Computational Model
+  - Lisp (1950s)
+  - ML
+  - Haskell
+- "Lambda Expressions" in almost every modern programming language
+ 
+* Why should I care?
+- Simple Computational Model
+  - to describe structure and behaviour (E.g. Operational Semantics)
+  - to reason and proove
+
+- Explains why things in FP are like they are
+  - pure functions
+  - higher-order functions
+  - currying
+  - lazy evaluation
+
+- Understand FP Compilers
+  - Good starting-point when you want to introduce FP stuff into other languages
+  - Good base when you what to write your own compiler
+  - GHC uses an enriched Lambda Calculus internally
+
+* Untyped Lambda Calculus
+
+\begin{align*}
+t ::=& \ x & \text{Variable} \\
+& \ \lambda x.t & \text{Abstraction} \\
+& \ t \ t & \text{Application}
+\end{align*}
+
+#+BEAMER: \pause
+
+** Example
+- Identity
+
+\begin{equation*}
+\underbrace{
+  \underbrace{\lambda x.x}_\text{Abstraction}
+ \quad
+ \underbrace{y}_\text{Variable}
+}_\text{Application}
+\to y
+\end{equation*}
+
+
+* More fun with Identity
+- Higher Order Functions
+
+\begin{equation*}
+\underbrace{
+  \underbrace{\lambda x.x}_\text{Abstraction}
+ \quad
+ \underbrace{\lambda y.y}_\text{Abstraction}
+}_\text{Application}
+\to \lambda y.y
+\end{equation*}
+
+
+#+BEAMER: \pause
+- Let's use parentheses to clearify what we mean...
+
+\begin{align*}
+& \lambda y . \lambda z . y \ z \ \lambda x.x \\
+\to & ?
+\end{align*}
+
+\begin{align*}
+& (\lambda y . \lambda z . y \ z) (\lambda x.x) \\
+ \to & \lambda z . ((\lambda x.x) \ z) \\
+ \to & \lambda z . z
+\end{align*}
+
+** TODO How to apply parentheses /exactly/?
+
+* Remarks
+- Everything (Term) is an Expression
+  - No statements
+- No "destructive" Variable Assignments
+  - The reason why FP Languages promote pure functions
+
+* Some Vocabulary
+$\lambda x . (x \ y)$
+
+- $x$ is /bound/ by the surrounding abstraction
+- $y$ is /free/
+  - E.g. part of the environment
+
+* Reductions and Conversions
+- Alpha conversion
+$\lambda x . x \to_\alpha \lambda y . y$
+
+#+BEAMER: \pause
+
+- Beta reduction
+$(\lambda x . x) y \to_\beta y$
+
+#+BEAMER: \pause
+
+- Eta conversion
+  - iff (if and only if) x is not free in f 
+$(\lambda x . f \ x) \to_\eta f$
+
+$(\lambda x . (\lambda y . y) \ x) \to_\eta \lambda y . y$
+
+  - x is not free in f
+$(\lambda x . (\lambda y . x) \ x)$
+
+
+* Currying
+$(\lambda x . \lambda y . x y) z  \to \lambda y . z y$
+
+- Example
+  - ~(+1)~ Section in Haskell
+$(\lambda x . \lambda y . + x y) 1  \to \lambda y . + 1 y$
+
+- Partial Application is built-in
+
+* Church Encodings
+
+- Encode Data into the Lambda Calculus
+
+- To simplify our formulas, let's say that we have declarations
+
+\begin{equation*}
+id \equiv \lambda x.x \\
+id y \to y
+\end{equation*}
+
+* Booleans
+\begin{align*}
+true \equiv \lambda t. \lambda f.t \\
+false \equiv \lambda t. \lambda f.f \\
+\\
+if\_then\_else \equiv 
+ \lambda c . 
+ \lambda b_{true} . 
+ \lambda b_{false} . 
+ c \ b_{true} \ b_{false}
+\end{align*}
+
+** Example
+\begin{align*}
+& if\_then\_else \ true \ a \ b \\
+\equiv & \ (\lambda c . \lambda b_{true} .  \lambda b_{false} .  c \ b_{true} \ b_{false}) \ true \ a \ b \\
+\to & true \ a \ b \\
+\equiv & (\lambda t. \lambda f.t) \ a \ b \\
+\to & (\lambda f.a) \ b \\
+\to & a
+\end{align*}
+
+* And
+\begin{align*}
+true \equiv \lambda t. \lambda f.t \\
+false \equiv \lambda t. \lambda f.f \\
+\\
+and \equiv \lambda p . \lambda q . p \ q \ p
+\end{align*}
+
+- Example
+\begin{align*}
+& and \ true \ false \\
+\equiv & (\lambda p . \lambda q . p \ q \ p) \ true \ false \\
+\to & (\lambda q . true \ q \ true) \ false \\
+\to & true false true \\
+\equiv & (\lambda t. \lambda f.t) \ false \ true \\
+\to & (\lambda f .false) true \\
+\to & false
+\end{align*}
+
+* Or
+$\lambda p . \lambda q . p p q$
+
+* Pairs
+\begin{align*}
+pair \equiv \lambda x. \lambda y . \lambda z . z\ x\ y \\
+first \equiv (\lambda p. p) (\lambda x . \lambda y . x) \\
+second \equiv (\lambda p. p) (\lambda x . \lambda y . y)
+\end{align*}
+
+** Example
+\begin{align*} 
+pair_{AB} & \equiv pair & \ a \ b \\
+& \equiv & (\lambda x. \lambda y . \lambda z . z\ x\ y) \ a \ b \\
+& \to & (\lambda y . \lambda z . z\  a\ y) b \\
+& \to & \lambda z . z\  a \ b \\
+& \equiv & pair'_{ab} \\
+\end{align*}
+
+* Pair Example (continued)
+\begin{align*}
+pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
+first & \equiv & (\lambda p. p) (\lambda x . \lambda y . x) \\
+\\
+first \ pair'_{ab} & \equiv & (\lambda p. p) (\lambda x . \lambda y . x) pair'_{ab} \\
+& \to & pair'_{ab} (\lambda x . \lambda y . x) \\
+& \equiv & (\lambda z . z\  a \ b) (\lambda x . \lambda y . x) \\
+& \to & (\lambda x . \lambda y . x) \ a \ b \\
+& \to & (\lambda y . a) \ b \\
+& \to & a
+\end{align*}
+# TODO Is pair_{ab} equivalent to it's reduced result?
+* Numerals
+
+- Peano axioms
+  - Every natural number can be defined with $0$ and a successor function
+\begin{align*}
+0 & \equiv & \lambda f. \lambda x. x \\
+1 & \equiv & \lambda f. \lambda x. f \ x \\
+2 & \equiv & \lambda f. \lambda x. f \ (f \ x) \\
+3 & \equiv & \lambda f. \lambda x. f \ (f \ (f \ x)) \\
+\end{align*}
+- Meaning
+  - $0$ :: $f$ is evaluated $0$ times
+  - $1$ :: $f$ is evaluated once
+  - $x$ :: can be every lambda term
+
+* Numerals Example - Successor
+
+\begin{align*}
+0 & \equiv & \lambda f. \lambda x. x \\
+1 & \equiv & \lambda f. \lambdax. f \ x \\
+\\
+successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x) \\
+\\
+successor 1 & \equiv & (\lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)) 1 \\
+& \to & \lambda f. \lambda x. f \ (1 \ f \ x) \\
+& \equiv \lambda f. \lambda x. f \ ((\lambda f. \lambda x. f \ x) \ f \ x) \\
+& to & \lambda f. \lambda x. f \ ((\lambda x. f \ x) \ x) \\
+& to & \lambda f. \lambda x. f \ (f \ x) \\
+& \equiv & 2
+\end{align*}
+
+* Numerals Example - 0 + 0
+
+\begin{align*}
+0 & \equiv & \lambda f. \lambda x. x 
+\\
+plus & \equiv & \lambda m. \lambda n. \lambda f. \lambda x. m f (n f x) \\
+\\
+plus \ 0 \ 0 & \equiv & (\lambda m. \lambda n. \lambda f. \lambda x. m f (n f x)) \ 0 \ 0 \\
+& \to & (\lambda n. \lambda f. \lambda x. 0 f (n f x)) \ 0 \\
+& \to & (\lambda f. \lambda x. 0 f (0 f x)) \\
+& \equiv & (\lambda f. \lambda x. (\lambda f. \lambda x. x) f (0 f x)) \\
+& \to & (\lambda f. \lambda x. (\lambda x. x) (0 f x)) \\
+& \to & (\lambda f. \lambda x. (0 f x)) \\
+& \equiv & (\lambda f. \lambda x. ((\lambda f. \lambda x. x) f x)) \\
+& \to & (\lambda f. \lambda x. ((\lambda x. x) x)) \\
+& \to & (\lambda f. \lambda x. x \\
+& \equiv & 0
+\end{align*}
+
+* Books
+The implementation of programming languages
+Type Systems
+
+* Thanks
+- Hope you enjoyed this talk and learned something new.
+- Hope it wasn't too much math and dusty formulas ... :)
