@@ -22,13 +22,13 @@
 - Simple Computational Model
   - to describe structure and behaviour (E.g. Operational Semantics)
   - to reason and proove
-
+#+BEAMER: \pause
 - Explains why things in FP are like they are
   - pure functions
   - higher-order functions
   - currying
   - lazy evaluation
-
+#+BEAMER: \pause
 - Understand FP Compilers
   - Good starting-point when you want to introduce FP stuff into other languages
   - Good base when you what to write your own compiler
@@ -72,6 +72,44 @@ t ::=& \ x & \text{Variable} \\
   - Lambda Expressions expand as much to the right as possible
   - We use parentheses to clearify what's meant
     - Even though I didn't specify them in the grammar ...
+* Full Beta-Reduction
+- RedEx
+  - \textbf{Red}ucible \textbf{Ex}pression
+  - Always an Application
+
+\begin{equation*}
+\underbrace{
+(\lambda x.x) \ (\underbrace{(\lambda x.x) \ (\lambda z.\underbrace{(\lambda x.x) \ z}_{RedEx})}_{RedEx})
+}_{RedEx}
+\end{equation*}
+
+- Full Beta-Reduction 
+  - Any RedEx,  Any Time
+  - Like in Arithmetics
+  - Too fuzzy to program...
+    - How to write a good test if the next step could be several expressions?
+
+* Normal Order Reduction
+\begin{align*}
+\onslide<1->{ & (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) \\ }
+\onslide<2->{\to & (\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) \\ }
+\onslide<3->{\to & (\lambda z.(\lambda x.x) \ z) \\ }
+\onslide<4->{\to & (\lambda z.z) }
+\end{align*}
+
+- Normal Order Reduction
+  - Left-most, Outer-most RedEx
+
+* Call-by-Name
+- Call-by-Name
+  - lazy, non-strict
+  - Save result -> Call-by-Need
+  - No reduction inside Abstractions
+
+* Call-by-Value
+- Call-by-Value
+  - eager, strict
+
 
 * Higher Order Functions
 - Functions that take or return functions
