@@ -1,9 +1,10 @@
-#+TITLE: Lambda Calculus 1
+#+TITLE: Untyped Lambda Calculus
 #+AUTHOR: Sven Tennie
 #+EMAIL: sven.tennie@dreamit.de
 #+KEYWORDS: "Simply Typed Lambda Calculus" "Church Encoding" "Currying"
 #+LANGUAGE:  en
 #+OPTIONS: tasks:nil toc:nil
+#+BEAMER_THEME: metropolis
 
 #+startup: beamer
 #+LaTeX_CLASS: beamer
@@ -30,8 +31,8 @@
   - lazy evaluation
 #+BEAMER: \pause
 - Understand FP Compilers
-  - Good starting-point when you want to introduce FP stuff into other languages
-  - Good base when you what to write your own compiler
+  - Introduce FP stuff into other languages
+  - Write your own compiler
   - GHC uses an enriched Lambda Calculus internally
 
 * Untyped Lambda Calculus
@@ -47,13 +48,28 @@ t ::=& \ x & \text{Variable} \\
 ** Example
 - Identity
 
+
+*** Lambda Calculus                                                :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.45
+    :BEAMER_env: block
+    :END:
+    \begin{equation*}
+    \underbrace{
+      \underbrace{\lambda x.x}_\text{Abstraction}
+      \quad
+      \underbrace{y}_\text{Variable}
+    }_\text{Application}
+    \to y
+    \end{equation*}
+#+BEAMER: \pause
+*** Javascript                                                :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.45
+    :BEAMER_env: block
+    :END:
 \begin{equation*}
-\underbrace{
-  \underbrace{\lambda x.x}_\text{Abstraction}
- \quad
- \underbrace{y}_\text{Variable}
-}_\text{Application}
-\to y
+\underbrace{(\underbrace{function \ (x)\{return \ x;\}}_{Abstraction}) \ (\underbrace{y}_{Variable})}_{Application}
 \end{equation*}
 
 * Evaluation / Reduction
@@ -67,11 +83,40 @@ t ::=& \ x & \text{Variable} \\
 \onslide<4->{\to & a \ b}
 \end{align*}
 
-#+ATTR_BEAMER: :overlay <5->
-- Remarks
-  - Lambda Expressions expand as much to the right as possible
-  - We use parentheses to clearify what's meant
-    - Even though I didn't specify them in the grammar ...
+\onslide<5->{Parentheses are not part of the grammer? See next slide :) }
+
+* Notational Conventions
+- We use parentheses to clearify what's meant
+- Applications associate to the left
+\begin{equation*}
+s \ t \ u \equiv (s \ t) \ u
+\end{equation*}
+- Lambda Expressions expand as much to the right as possible
+\begin{equation*}
+\lambda x . \lambda y . x \ y \ x \equiv \lambda x . ( \lambda y . ((x \ y) \ x))
+\end{equation*}
+
+* Scope
+\begin{equation*}
+\lambda x . \lambda y . x \ y \ z
+\end{equation*}
+
+- $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
+- $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
+- $\lambda x$, $\lambda y$ :: /binder/
+
+- A term with no free variables is /"closed"/
+  - A /"combinator"/
+  - $id \equiv \lambda x . x$
+
+* Operational Semantics
+- We learned how to write down and talk about Lambda Calculus Terms
+
+- How to evaluate them?
+
+- Different Strategies
+  - Interesting outcomes
+
 * Full Beta-Reduction
 - RedEx
   - \textbf{Red}ucible \textbf{Ex}pression
@@ -82,7 +127,7 @@ t ::=& \ x & \text{Variable} \\
 (\lambda x.x) \ (\underbrace{(\lambda x.x) \ (\lambda z.\underbrace{(\lambda x.x) \ z}_{RedEx})}_{RedEx})
 }_{RedEx}
 \end{equation*}
-
+#+BEAMER: \pause
 - Full Beta-Reduction 
   - Any RedEx,  Any Time
   - Like in Arithmetics
@@ -91,10 +136,10 @@ t ::=& \ x & \text{Variable} \\
 
 * Normal Order Reduction
 \begin{align*}
-\onslide<1->{ & (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) \\ }
-\onslide<2->{\to & (\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) \\ }
-\onslide<3->{\to & (\lambda z.(\lambda x.x) \ z) \\ }
-\onslide<4->{\to & (\lambda z.z) }
+\alt<1>{ & (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) \\ } { & \underline{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{\alt<3>{\to & (\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) \\ } {\to & \underline{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }}
+\onslide<5->{\alt<5>{\to & (\lambda z.(\lambda x.x) \ z)}{\to & \underline{(\lambda z.(\lambda x.x) \ z)}} \\ }
+\onslide<5->{\to & (\lambda z.z) }
 \end{align*}
 
 - Normal Order Reduction
@@ -103,6 +148,8 @@ t ::=& \ x & \text{Variable} \\
 * Call-by-Name
 - Call-by-Name
   - lazy, non-strict
+  - Parameters are NOT evaluated before they are passed to Lambdas
+  - Lambdas are values
   - Save result -> Call-by-Need
   - No reduction inside Abstractions
 
@@ -139,13 +186,6 @@ $(\lambda x . \lambda y . + x y) 1  \to \lambda y . + 1 y$
 - No "destructive" Variable Assignments
   - The reason why FP Languages promote pure functions
 
-* Some Vocabulary
-$\lambda x . (x \ y)$
-
-- $x$ is /bound/ by the surrounding abstraction
-- $y$ is /free/
-  - E.g. part of the environment
-
 * Reductions and Conversions
 - Alpha conversion
 $\lambda x . x \to_\alpha \lambda y . y$
@@ -166,6 +206,10 @@ $(\lambda x . (\lambda y . y) \ x) \to_\eta \lambda y . y$
   - x is not free in f
 $(\lambda x . (\lambda y . x) \ x)$
 
+* Translate Lambda Calculus to Javascript
+Variable -> Variable
+Abstraction -> Function Declaration
+Application -> Function Call
 
 * Church Encodings
 
