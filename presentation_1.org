@@ -1,10 +1,12 @@
 #+TITLE: Untyped Lambda Calculus
 #+AUTHOR: Sven Tennie
 #+EMAIL: sven.tennie@dreamit.de
-#+KEYWORDS: "Simply Typed Lambda Calculus" "Church Encoding" "Currying"
+#+KEYWORDS: "Untyped Lambda Calculus" "Structure and Evaluation" "Currying" "Church Encodings"
 #+LANGUAGE:  en
 #+OPTIONS: tasks:nil toc:nil
 #+BEAMER_THEME: metropolis
+#+BEAMER_HEADER: \subtitle{Structure and Evaluation, Currying, Church Encodings}
+#+BEAMER_HEADER: \institute[INST]{Dream IT\\\url{https://dreamit.de}}
 
 #+startup: beamer
 #+LaTeX_CLASS: beamer
@@ -21,7 +23,7 @@
  
 * Why should I care?
 - Simple Computational Model
-  - to describe structure and behaviour (E.g. Operational Semantics)
+  - to describe structure and behaviour (E.g. Operational Semantics, Type Systems)
   - to reason and proove
 #+BEAMER: \pause
 - Explains why things in FP are like they are
@@ -38,16 +40,15 @@
 * Untyped Lambda Calculus
 
 \begin{align*}
-t ::=& \ x & \text{Variable} \\
+t ::= & & \text{Terms:} \\
+& \ x & \text{Variable} \\
 & \ \lambda x.t & \text{Abstraction} \\
 & \ t \ t & \text{Application}
 \end{align*}
 
 #+BEAMER: \pause
 
-** Example
-- Identity
-
+** Example - Identity
 
 *** Lambda Calculus                                                :B_block:BMCOL:
     :PROPERTIES:
@@ -83,7 +84,7 @@ t ::=& \ x & \text{Variable} \\
 \onslide<4->{\to & a \ b}
 \end{align*}
 
-\onslide<5->{Parentheses are not part of the grammer? See next slide :) }
+Parentheses are not part of the grammer? See next slide... :)
 
 * Notational Conventions
 - We use parentheses to clearify what's meant
@@ -101,9 +102,10 @@ s \ t \ u \equiv (s \ t) \ u
 \lambda x . \lambda y . x \ y \ z
 \end{equation*}
 
-- $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
-- $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
-- $\lambda x$, $\lambda y$ :: /binder/
+- /Bound/ and /free/
+  - $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
+  - $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
+  - $\lambda x$, $\lambda y$ :: /binder/
 
 - A term with no free variables is /"closed"/
   - A /"combinator"/
@@ -129,33 +131,50 @@ s \ t \ u \equiv (s \ t) \ u
 \end{equation*}
 #+BEAMER: \pause
 - Full Beta-Reduction 
-  - Any RedEx,  Any Time
+  - Any RedEx, Any Time
   - Like in Arithmetics
-  - Too fuzzy to program...
+  - Too vague for programming...
     - How to write a good test if the next step could be several expressions?
 
 * Normal Order Reduction
 \begin{align*}
-\alt<1>{ & (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) \\ } { & \underline{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{\alt<3>{\to & (\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) \\ } {\to & \underline{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }}
-\onslide<5->{\alt<5>{\to & (\lambda z.(\lambda x.x) \ z)}{\to & \underline{(\lambda z.(\lambda x.x) \ z)}} \\ }
-\onslide<5->{\to & (\lambda z.z) }
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
+\onslide<5->{\to & \lambda z.\alert<6->{(\lambda x.x) \ z } \\ }
+\onslide<7->{\to & \lambda z.z }
 \end{align*}
 
 - Normal Order Reduction
   - Left-most, Outer-most RedEx
 
 * Call-by-Name
+\begin{align*}
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
+\onslide<5->{\to & \lambda z.(\lambda x.x) \ z  \\ }
+\onslide<6->{\not\to}
+\end{align*}
+
 - Call-by-Name
+  - like Normal Order Reduction, but NO reductions inside Abstractions
   - lazy, non-strict
-  - Parameters are NOT evaluated before they are passed to Lambdas
+  - Parameters are NOT evaluated before they are used
   - Lambdas are values
-  - Save result -> Call-by-Need
-  - No reduction inside Abstractions
+  - Optimization: Save result \to /Call-by-Need/
 
 * Call-by-Value
+\begin{align*}
+\onslide<1->{ &  (\lambda x.x) \ \alert<2->{((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{ \to &  \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)} \\ }
+\onslide<5->{ \to &  \lambda z.(\lambda x.x) \ z \\ }
+\onslide<6->{\not \to}
+\end{align*}
+
 - Call-by-Value
+  - Outer-most, only if right-hand side was reduced to a value 
   - eager, strict
+  - Parameters ARE evaluated before they are used
+  - Lambdas are values
 
 
 * Higher Order Functions
@@ -172,44 +191,56 @@ s \ t \ u \equiv (s \ t) \ u
 \end{equation*}
 
 * Currying
-$(\lambda x . \lambda y . x y) z  \to \lambda y . z y$
+
+$(\lambda x . \lambda y . x \ y) \ z  \to \lambda y . z \ y$
 
 - Example
   - ~(+1)~ Section in Haskell
-$(\lambda x . \lambda y . + x y) 1  \to \lambda y . + 1 y$
+  - $(\lambda x . \lambda y . + x \ y) \ 1  \to \lambda y . + \ 1 \ y$
 
 - Partial Application is there "by definition"
 
 * Remarks
 - Everything (Term) is an Expression
   - No statements
-- No "destructive" Variable Assignments
+- No "destructive" Assignments
   - The reason why FP Languages promote pure functions
+  - But you could invent a built-in function to manipulate "state"...
 
 * Reductions and Conversions
-- Alpha conversion
-$\lambda x . x \to_\alpha \lambda y . y$
+** Alpha conversion :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: block
+   :END:
+\begin{equation*}
+\lambda x . x \to_\alpha \lambda y . y
+\end{equation*}
 
 #+BEAMER: \pause
 
-- Beta reduction
-$(\lambda x . x) y \to_\beta y$
+** Beta reduction :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: block
+   :END:
+\begin{equation*}
+(\lambda x . x) \ y \to_\beta y
+\end{equation*}
 
 #+BEAMER: \pause
 
-- Eta conversion
-  - iff (if and only if) x is not free in f 
-$(\lambda x . f \ x) \to_\eta f$
+** Eta conversion
+Iff (if and only if) $x$ is not free in $f$:
+\begin{gather*}
+\lambda x . f \ x \to_\eta f \\
+(\lambda x . (\lambda y . y) \ x) \ a \to_\eta (\lambda y . y) \ a
+\end{gather*}
 
-$(\lambda x . (\lambda y . y) \ x) \to_\eta \lambda y . y$
-
-  - x is not free in f
-$(\lambda x . (\lambda y . x) \ x)$
-
-* Translate Lambda Calculus to Javascript
-Variable -> Variable
-Abstraction -> Function Declaration
-Application -> Function Call
+If $x$ is free in $f$, no \eta conversion possible:
+\begin{equation*}
+\lambda x . (\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x}) \ x \not\to_\eta (\lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})$
+\end{equation*}
 
 * Church Encodings
 
@@ -217,132 +248,229 @@ Application -> Function Call
 
 - To simplify our formulas, let's say that we have declarations
 
-\begin{equation*}
-id \equiv \lambda x.x \\
-id y \to y
-\end{equation*}
+\begin{gather*}
+id  \equiv \lambda x.x \\
+id \ y \to  y
+\end{gather*}
 
 * Booleans
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-true \equiv \lambda t. \lambda f.t \\
-false \equiv \lambda t. \lambda f.f \\
+true & \equiv & \lambda t. \lambda f.t \\
+false & \equiv & \lambda t. \lambda f.f \\
 \\
-if\_then\_else \equiv 
+\onslide<2->{
+test & \equiv &
  \lambda c . 
- \lambda b_{true} . 
- \lambda b_{false} . 
- c \ b_{true} \ b_{false}
+ \lambda t . 
+ \lambda f . 
+ c \ t \ f }
 \end{align*}
-
-** Example
+#+BEAMER: \pause
+** Example                                                         :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-& if\_then\_else \ true \ a \ b \\
-\equiv & \ (\lambda c . \lambda b_{true} .  \lambda b_{false} .  c \ b_{true} \ b_{false}) \ true \ a \ b \\
-\to & true \ a \ b \\
-\equiv & (\lambda t. \lambda f.t) \ a \ b \\
-\to & (\lambda f.a) \ b \\
-\to & a
+\onslide<3->{& \alert<4->{test} \ true \ a \ b } \\
+\onslide<5->{\equiv & \ \alert<6->{(\lambda c . \lambda t .  \lambda f .  c \ t \ f) \ true } \ a \ b } \\
+\onslide<7->{\to & \ \alert<8->{(\lambda t .  \lambda f .  true \ t \ f) \ a} \ b } \\
+\onslide<9->{\to & \ \alert<10->{(\lambda f .  true \ a \ f) \ b }} \\
+\onslide<11->{\to & \alert<12->{true} \ a \ b } \\
+\onslide<13->{\equiv & \alert<14->{(\lambda t. \lambda f.t) \ a} \ b } \\
+\onslide<15->{\to & \alert<16->{(\lambda f.a) \ b } } \\
+\onslide<17->{\to & a }
 \end{align*}
 
 * And
+** Definitions                                                     :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-true \equiv \lambda t. \lambda f.t \\
-false \equiv \lambda t. \lambda f.f \\
+true & \equiv & \lambda t. \lambda f.t \\
+false & \equiv & \lambda t. \lambda f.f \\
 \\
-and \equiv \lambda p . \lambda q . p \ q \ p
+\onslide<2->{
+and & \equiv & \lambda p . \lambda q . p \ q \ p
+}
 \end{align*}
 
-- Example
+** Example                                                         :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-& and \ true \ false \\
-\equiv & (\lambda p . \lambda q . p \ q \ p) \ true \ false \\
-\to & (\lambda q . true \ q \ true) \ false \\
-\to & true false true \\
-\equiv & (\lambda t. \lambda f.t) \ false \ true \\
-\to & (\lambda f .false) true \\
-\to & false
+\onslide<3->{& \alert<4->{and} \ true \ false } \\
+\onslide<5->{\equiv & \alert<6->{(\lambda p . \lambda q . p \ q \ p) \ true } \ false } \\
+\onslide<7->{\to & \alert<8->{(\lambda q . true \ q \ true) \ false } } \\
+\onslide<9->{\to & \alert<10->{true} \ false \ true } \\
+\onslide<11->{\equiv & \alert<12->{(\lambda t. \lambda f.t) \ false} \ true } \\
+\onslide<13->{\to & \alert<14->{(\lambda f .false) \ true } } \\
+\onslide<15->{\to & false }
 \end{align*}
 
 * Or
-$\lambda p . \lambda q . p p q$
+\begin{equation*}
+\lambda p . \lambda q . p \ p \ q
+\end{equation*}
 
 * Pairs
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-pair \equiv \lambda x. \lambda y . \lambda z . z\ x\ y \\
-first \equiv (\lambda p. p) (\lambda x . \lambda y . x) \\
-second \equiv (\lambda p. p) (\lambda x . \lambda y . y)
+\onslide<1->{pair & \equiv & \lambda x. \lambda y . \lambda z . z \ x \ y } \\
+\onslide<2->{
+first & \equiv & (\lambda p. p) \ \lambda x . \lambda y . x \\
+second & \equiv & (\lambda p. p) \ \lambda x . \lambda y . y
+}
 \end{align*}
 
-** Example
+** Example                                                         :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*} 
-pair_{AB} & \equiv pair & \ a \ b \\
-& \equiv & (\lambda x. \lambda y . \lambda z . z\ x\ y) \ a \ b \\
-& \to & (\lambda y . \lambda z . z\  a\ y) b \\
-& \to & \lambda z . z\  a \ b \\
-& \equiv & pair'_{ab} \\
+\onslide<3->{pair_{AB} & \equiv & \alert<4->{pair}  \ a \ b } \\
+\onslide<5->{& \equiv & \alert<6->{(\lambda x. \lambda y . \lambda z . z\ x\ y) \ a } \ b } \\
+\onslide<7->{& \to & \alert<8->{(\lambda y . \lambda z . z\  a\ y) b } } \\
+\onslide<9->{& \to & \lambda z . z\  a \ b } \\
+\onslide<10->{& \equiv & pair'_{ab} } \\
 \end{align*}
 
-* Pair Example (continued)
+* Pairs (continued)
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
+\onslide<1->{pair & \equiv & \lambda x. \lambda y . \lambda z . z \ x \ y \\
+first & \equiv & (\lambda p. p) \ \lambda x . \lambda y . x \\
 pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
-first & \equiv & (\lambda p. p) (\lambda x . \lambda y . x) \\
-\\
-first \ pair'_{ab} & \equiv & (\lambda p. p) (\lambda x . \lambda y . x) pair'_{ab} \\
-& \to & pair'_{ab} (\lambda x . \lambda y . x) \\
-& \equiv & (\lambda z . z\  a \ b) (\lambda x . \lambda y . x) \\
-& \to & (\lambda x . \lambda y . x) \ a \ b \\
-& \to & (\lambda y . a) \ b \\
-& \to & a
+}
 \end{align*}
+
+** Example :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
+\begin{align*}
+\onslide<2->{& & \alert<3->{first} \ pair'_{ab} } \\
+\onslide<4->{& \equiv & \alert<5->{(\lambda p. p) \ (\lambda x . \lambda y . x) \ pair'_{ab}} } \\
+\onslide<6->{& \to & \alert<7->{pair'_{ab}} \ (\lambda x . \lambda y . x) } \\
+\onslide<8->{& \equiv & \alert<9->{(\lambda z . z\  a \ b) \ (\lambda x . \lambda y . x) }} \\
+\onslide<10->{& \to & \alert<11->{(\lambda x . \lambda y . x) \ a} \ b } \\
+\onslide<12->{& \to & \alert<13->{(\lambda y . a) \ b } } \\
+\onslide<14->{& \to & a}
+\end{align*}
+
 # TODO Is pair_{ab} equivalent to it's reduced result?
 * Numerals
-
-- Peano axioms
-  - Every natural number can be defined with $0$ and a successor function
+** Peano axioms  :B_block:BMCOL:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: block
+   :END:
+Every natural number can be defined with $0$ and a successor function
 \begin{align*}
 0 & \equiv & \lambda f. \lambda x. x \\
 1 & \equiv & \lambda f. \lambda x. f \ x \\
 2 & \equiv & \lambda f. \lambda x. f \ (f \ x) \\
 3 & \equiv & \lambda f. \lambda x. f \ (f \ (f \ x)) \\
 \end{align*}
-- Meaning
+** Meaning  :B_block:BMCOL:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: block
+   :END:
   - $0$ :: $f$ is evaluated $0$ times
   - $1$ :: $f$ is evaluated once
   - $x$ :: can be every lambda term
 
 * Numerals Example - Successor
 
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
+\onslide<1->{
 0 & \equiv & \lambda f. \lambda x. x \\
-1 & \equiv & \lambda f. \lambdax. f \ x \\
+1 & \equiv & \lambda f. \lambda x. f \ x \\
+}
 \\
-successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x) \\
-\\
-successor 1 & \equiv & (\lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)) 1 \\
-& \to & \lambda f. \lambda x. f \ (1 \ f \ x) \\
-& \equiv \lambda f. \lambda x. f \ ((\lambda f. \lambda x. f \ x) \ f \ x) \\
-& to & \lambda f. \lambda x. f \ ((\lambda x. f \ x) \ x) \\
-& to & \lambda f. \lambda x. f \ (f \ x) \\
-& \equiv & 2
+\onslide<2->{
+successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)
+}
 \end{align*}
+
+** Example                                                         :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
+\begin{align*}
+\onslide<+(2)->{& & \alert<+(2)->{successor} \ 1 } \\
+\onslide<+(2)->{& \equiv & \alert<+(2)->{(\lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)) \ 1 } } \\
+\onslide<+(2)->{& \to & \lambda f. \lambda x. f \ (\alert<+(2)->{1} \ f \ x) } \\
+\onslide<+(2)->{& \equiv & \lambda f. \lambda x. f \ (\alert<+(2)->{(\lambda f. \lambda x. f \ x) \ f } \ x) } \\
+\onslide<+(2)->{& \to & \lambda f. \lambda x. f \ (\alert<+(2)->{(\lambda x. f \ x) \ x}) } \\
+\onslide<+(2)->{& \to & \lambda f. \lambda x. f \ (f \ x) } \\
+\onslide<+(2)->{& \equiv & 2}
+\end{align*}
+
+** Note                                                             :B_block:
+   :PROPERTIES:
+   :BEAMER_act: <8->
+   :BEAMER_env: block
+   :END:
+We use /Normal Order Reduction/ to reduce inside abstractions!
+
 
 * Numerals Example - 0 + 0
 
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
 \begin{align*}
-0 & \equiv & \lambda f. \lambda x. x 
+\onslide<+->{0 & \equiv & \lambda f. \lambda x. x } \\
 \\
-plus & \equiv & \lambda m. \lambda n. \lambda f. \lambda x. m f (n f x) \\
-\\
-plus \ 0 \ 0 & \equiv & (\lambda m. \lambda n. \lambda f. \lambda x. m f (n f x)) \ 0 \ 0 \\
-& \to & (\lambda n. \lambda f. \lambda x. 0 f (n f x)) \ 0 \\
-& \to & (\lambda f. \lambda x. 0 f (0 f x)) \\
-& \equiv & (\lambda f. \lambda x. (\lambda f. \lambda x. x) f (0 f x)) \\
-& \to & (\lambda f. \lambda x. (\lambda x. x) (0 f x)) \\
-& \to & (\lambda f. \lambda x. (0 f x)) \\
-& \equiv & (\lambda f. \lambda x. ((\lambda f. \lambda x. x) f x)) \\
-& \to & (\lambda f. \lambda x. ((\lambda x. x) x)) \\
-& \to & (\lambda f. \lambda x. x \\
-& \equiv & 0
+\onslide<+->{plus & \equiv & \lambda m. \lambda n. \lambda f. \lambda x. m \ f \ (n \ f \ x) }
+\end{align*}
+
+** Definitions :B_column:
+   :PROPERTIES:
+   :BEAMER_col: 0.45
+   :BEAMER_env: column
+   :END:
+\begin{align*}
+\onslide<+->{& & \alert<+->{plus} \ 0 \ 0} \\
+\onslide<+->{& \equiv & \alert<+->{(\lambda m. \lambda n. \lambda f. \lambda x. m \ f \ (n \ f \ x)) \ 0 } \ 0 } \\
+\onslide<+->{& \to & \alert<+->{(\lambda n. \lambda f. \lambda x. 0 \ f \ (n \ f \ x)) \ 0 }} \\
+\onslide<+->{& \to & \lambda f. \lambda x. \alert<+->{0} \ f \ (0 \ f \ x) } \\
+\onslide<+->{& \equiv & \lambda f. \lambda x. \alert<+->{(\lambda f. \lambda x. x) \ f} \ (0 \ f \ x) } \\
+\onslide<+->{& \to & \lambda f. \lambda x. \alert<+->{(\lambda x. x) \ (0 \ f \ x) }} \\
+\onslide<+->{& \to & \lambda f. \lambda x. \alert<+->{0} \ f \ x } \\
+\onslide<+->{& \equiv & \lambda f. \lambda x. \alert<+->{(\lambda f. \lambda x. x) \ f } \ x } \\
+\onslide<+->{& \to & \lambda f. \lambda x. \alert<+->{(\lambda x. x) \ x }} \\
+\onslide<+->{& \to & \lambda f. \lambda x. x } \\
+\onslide<+->{& \equiv & 0 }
 \end{align*}
 
 * Books
