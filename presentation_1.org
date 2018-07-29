@@ -3,7 +3,7 @@
 #+EMAIL: sven.tennie@dreamit.de
 #+KEYWORDS: "Untyped Lambda Calculus" "Structure and Evaluation" "Currying" "Church Encodings"
 #+LANGUAGE:  en
-#+OPTIONS: tasks:nil toc:nil
+#+OPTIONS: tasks:nil toc:nil H:2
 #+BEAMER_THEME: metropolis
 #+BEAMER_HEADER: \subtitle{Structure and Evaluation, Currying, Church Encodings}
 #+BEAMER_HEADER: \institute[INST]{Dream IT\\\url{https://dreamit.de}}
@@ -11,7 +11,8 @@
 #+startup: beamer
 #+LaTeX_CLASS: beamer
 
-* Lambda Calculus
+* Introduction
+** Lambda Calculus
 - Invented by Alonzo Church (1920s)
 - Equally expressive to the Turing Machine(s)
 - Formal Language
@@ -21,7 +22,7 @@
   - Haskell
 - "Lambda Expressions" in almost every modern programming language
  
-* Why should I care?
+** Why should I care?
 - Simple Computational Model
   - to describe structure and behaviour (E.g. Operational Semantics, Type Systems)
   - to reason and proove
@@ -37,7 +38,8 @@
   - Write your own compiler
   - GHC uses an enriched Lambda Calculus internally
 
-* Untyped Lambda Calculus
+* Basics
+** Untyped Lambda Calculus
 
 \begin{align*}
 t ::= & & \text{Terms:} \\
@@ -47,8 +49,7 @@ t ::= & & \text{Terms:} \\
 \end{align*}
 
 #+BEAMER: \pause
-
-** Example - Identity
+*** Example - Identity
 
 *** Lambda Calculus                                                :B_block:BMCOL:
     :PROPERTIES:
@@ -73,7 +74,7 @@ t ::= & & \text{Terms:} \\
 \underbrace{(\underbrace{function \ (x)\{return \ x;\}}_{Abstraction}) \ (\underbrace{y}_{Variable})}_{Application}
 \end{equation*}
 
-* Evaluation / Reduction
+** Evaluation / Reduction
 \begin{equation*}
 \underbrace{\underbrace{(\underbrace{\lambda x . \underbrace{\lambda y . \underbrace{x \ y}_{Application}}_{Abstraction}}_{Abstraction}) \underbrace{a}_{Variable}}_{Application} \  \underbrace{b}_{Variable}}_{Application}
 \end{equation*}
@@ -86,98 +87,33 @@ t ::= & & \text{Terms:} \\
 
 Parentheses are not part of the grammer? See next slide... :)
 
-* Notational Conventions
+** Notational Conventions
 - We use parentheses to clearify what's meant
 - Applications associate to the left
 \begin{equation*}
 s \ t \ u \equiv (s \ t) \ u
 \end{equation*}
-- Lambda Expressions expand as much to the right as possible
+- Abstractions expand as much to the right as possible
 \begin{equation*}
-\lambda x . \lambda y . x \ y \ x \equiv \lambda x . ( \lambda y . ((x \ y) \ x))
+\lambda x . \lambda y . x \ y \ x \equiv \lambda x . ( \lambda y . (x \ y \ x ) )
 \end{equation*}
 
-* Scope
+** Scope
 \begin{equation*}
 \lambda x . \lambda y . x \ y \ z
 \end{equation*}
 
-- /Bound/ and /free/
-  - $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
-  - $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
-  - $\lambda x$, $\lambda y$ :: /binder/
-
-- A term with no free variables is /"closed"/
-  - A /"combinator"/
-  - $id \equiv \lambda x . x$
-
-* Operational Semantics
-- We learned how to write down and talk about Lambda Calculus Terms
-
-- How to evaluate them?
-
-- Different Strategies
-  - Interesting outcomes
-
-* Full Beta-Reduction
-- RedEx
-  - \textbf{Red}ucible \textbf{Ex}pression
-  - Always an Application
-
-\begin{equation*}
-\underbrace{
-(\lambda x.x) \ (\underbrace{(\lambda x.x) \ (\lambda z.\underbrace{(\lambda x.x) \ z}_{RedEx})}_{RedEx})
-}_{RedEx}
-\end{equation*}
+*** /Bound/ and /free/
+- $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
+- $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
+- $\lambda x$, $\lambda y$ :: /binder/
 #+BEAMER: \pause
-- Full Beta-Reduction 
-  - Any RedEx, Any Time
-  - Like in Arithmetics
-  - Too vague for programming...
-    - How to write a good test if the next step could be several expressions?
+*** A term with no free variables is /"closed"/
+- A /"combinator"/
+- $id \equiv \lambda x . x$
+- Y, S, K, I ...
 
-* Normal Order Reduction
-\begin{align*}
-\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
-\onslide<5->{\to & \lambda z.\alert<6->{(\lambda x.x) \ z } \\ }
-\onslide<7->{\to & \lambda z.z }
-\end{align*}
-
-- Normal Order Reduction
-  - Left-most, Outer-most RedEx
-
-* Call-by-Name
-\begin{align*}
-\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
-\onslide<5->{\to & \lambda z.(\lambda x.x) \ z  \\ }
-\onslide<6->{\not\to}
-\end{align*}
-
-- Call-by-Name
-  - like Normal Order Reduction, but NO reductions inside Abstractions
-  - lazy, non-strict
-  - Parameters are NOT evaluated before they are used
-  - Lambdas are values
-  - Optimization: Save result \to /Call-by-Need/
-
-* Call-by-Value
-\begin{align*}
-\onslide<1->{ &  (\lambda x.x) \ \alert<2->{((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{ \to &  \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)} \\ }
-\onslide<5->{ \to &  \lambda z.(\lambda x.x) \ z \\ }
-\onslide<6->{\not \to}
-\end{align*}
-
-- Call-by-Value
-  - Outer-most, only if right-hand side was reduced to a value 
-  - eager, strict
-  - Parameters ARE evaluated before they are used
-  - Lambdas are values
-
-
-* Higher Order Functions
+** Higher Order Functions
 - Functions that take or return functions
   - Are there "by definition"
 
@@ -190,25 +126,32 @@ s \ t \ u \equiv (s \ t) \ u
 \to \underbrace{\lambda y.y}_{Abstraction}
 \end{equation*}
 
-* Currying
+** Currying
 
-$(\lambda x . \lambda y . x \ y) \ z  \to \lambda y . z \ y$
+*** Idea
+- Take a funktion with $n$ arguments
+- Create a funktion that takes one argument and returns a function with $n-1$ arguments
 
-- Example
+#+BEAMER: \pause
+
+*** Example
   - ~(+1)~ Section in Haskell
   - $(\lambda x . \lambda y . + x \ y) \ 1  \to \lambda y . + \ 1 \ y$
 
-- Partial Application is there "by definition"
+#+BEAMER: \pause
 
-* Remarks
-- Everything (Term) is an Expression
-  - No statements
-- No "destructive" Assignments
-  - The reason why FP Languages promote pure functions
-  - But you could invent a built-in function to manipulate "state"...
+- Partial Function Application is there "by definition"
+  - You can use this stunt to "curry" in every language that supports "Lambda Expressions"
 
-* Reductions and Conversions
-** Alpha conversion :B_column:
+*** Notes :B_note:
+    :PROPERTIES:
+    :BEAMER_env: note
+    :END:
+- Moses Schönfinkel
+  - If you want to sound smart: Schönfinkeling
+
+** Reductions and Conversions
+*** Alpha conversion                                               :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -219,7 +162,7 @@ $(\lambda x . \lambda y . x \ y) \ z  \to \lambda y . z \ y$
 
 #+BEAMER: \pause
 
-** Beta reduction :B_column:
+*** Beta reduction                                                 :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -230,19 +173,100 @@ $(\lambda x . \lambda y . x \ y) \ z  \to \lambda y . z \ y$
 
 #+BEAMER: \pause
 
-** Eta conversion
+*** Eta conversion
 Iff (if and only if) $x$ is not free in $f$:
 \begin{gather*}
 \lambda x . f \ x \to_\eta f \\
-(\lambda x . (\lambda y . y) \ x) \ a \to_\eta (\lambda y . y) \ a
+(\lambda x . \underbrace{(\lambda y . y)}_{f} \ x) \ a \to_\eta \underbrace{(\lambda y . y)}_{f} \ a
 \end{gather*}
 
 If $x$ is free in $f$, no \eta conversion possible:
 \begin{equation*}
-\lambda x . (\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x}) \ x \not\to_\eta (\lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})$
+\lambda x . (\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x}) \ x \not\to_\eta ( \lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})
 \end{equation*}
 
+** Remarks
+- Everything (Term) is an Expression
+  - No statements
+- No "destructive" Assignments
+  - The reason why FP Languages promote pure functions
+  - But you could invent a built-in function to manipulate "state"...
+
+
+* Evaluation
+** Operational Semantics
+- We learned how to write down and talk about Lambda Calculus Terms
+
+- How to evaluate them?
+
+- Different Strategies
+  - Interesting outcomes
+
+** Full Beta-Reduction
+- RedEx
+  - \textbf{Red}ucible \textbf{Ex}pression
+  - Always an Application
+
+\begin{equation*}
+\underbrace{
+(\lambda x.x) \ (\underbrace{(\lambda x.x) \ (\lambda z.\underbrace{(\lambda x.x) \ z}_{RedEx})}_{RedEx})
+}_{RedEx}
+\end{equation*}
+#+BEAMER: \pause
+*** Full Beta-Reduction 
+- Any RedEx, Any Time
+- Like in Arithmetics
+- Too vague for programming...
+
+*** Notes :B_note:
+    :PROPERTIES:
+    :BEAMER_env: note
+    :END:
+How to write a good test if the next step could be several expressions?
+
+** Normal Order Reduction
+\begin{align*}
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
+\onslide<5->{\to & \lambda z.\alert<6->{(\lambda x.x) \ z } \\ }
+\onslide<7->{\to & \lambda z.z }
+\end{align*}
+
+*** Normal Order Reduction
+- Left-most, Outer-most RedEx
+
+** Call-by-Name
+\begin{align*}
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
+\onslide<5->{\to & \lambda z.(\lambda x.x) \ z  \\ }
+\onslide<6->{\not\to}
+\end{align*}
+
+*** Call-by-Name
+  - like Normal Order Reduction, but NO reductions inside Abstractions
+    - Abstractions are values
+  - lazy, non-strict
+  - Parameters are NOT evaluated before they are used
+  - Optimization: Save result \to /Call-by-Need/
+
+** Call-by-Value
+\begin{align*}
+\onslide<1->{ &  (\lambda x.x) \ \alert<2->{((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
+\onslide<3->{ \to &  \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)} \\ }
+\onslide<5->{ \to &  \lambda z.(\lambda x.x) \ z \\ }
+\onslide<6->{\not \to}
+\end{align*}
+
+*** Call-by-Value
+  - Outer-most, only if right-hand side was reduced to a value 
+    - Parameters ARE evaluated before they are used
+  - NO reductions inside Abstractions
+    - Abstractions are values
+  - eager, strict
+
 * Church Encodings
+** Church Encodings
 
 - Encode Data into the Lambda Calculus
 
@@ -253,7 +277,7 @@ id  \equiv \lambda x.x \\
 id \ y \to  y
 \end{gather*}
 
-* Booleans
+** Booleans
 ** Definitions :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
@@ -287,7 +311,7 @@ test & \equiv &
 \onslide<17->{\to & a }
 \end{align*}
 
-* And
+** And
 ** Definitions                                                     :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
@@ -317,12 +341,12 @@ and & \equiv & \lambda p . \lambda q . p \ q \ p
 \onslide<15->{\to & false }
 \end{align*}
 
-* Or
+** Or
 \begin{equation*}
 \lambda p . \lambda q . p \ p \ q
 \end{equation*}
 
-* Pairs
+** Pairs
 ** Definitions :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
@@ -349,7 +373,7 @@ second & \equiv & (\lambda p. p) \ \lambda x . \lambda y . y
 \onslide<10->{& \equiv & pair'_{ab} } \\
 \end{align*}
 
-* Pairs (continued)
+** Pairs (continued)
 ** Definitions :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
@@ -378,7 +402,7 @@ pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
 \end{align*}
 
 # TODO Is pair_{ab} equivalent to it's reduced result?
-* Numerals
+** Numerals
 ** Peano axioms  :B_block:BMCOL:
    :PROPERTIES:
    :BEAMER_col: 0.45
@@ -400,7 +424,7 @@ Every natural number can be defined with $0$ and a successor function
   - $1$ :: $f$ is evaluated once
   - $x$ :: can be every lambda term
 
-* Numerals Example - Successor
+** Numerals Example - Successor
 
 ** Definitions :B_column:
    :PROPERTIES:
@@ -440,8 +464,7 @@ successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)
    :END:
 We use /Normal Order Reduction/ to reduce inside abstractions!
 
-
-* Numerals Example - 0 + 0
+** Numerals Example - 0 + 0
 
 ** Definitions :B_column:
    :PROPERTIES:
@@ -473,9 +496,24 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
 \onslide<+->{& \equiv & 0 }
 \end{align*}
 
-* Books
-The implementation of programming languages
-Type Systems
+* (Almost) The End
+** Books
+#+LaTeX: \metroset{block=fill}
+*** Good Math :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+- Easy to understand
+- Blog: http://www.goodmath.org/blog/
+
+*** The Implementation of Functional Programming Languages
+- How to compile to the Lambda Calculus?
+- Free: https://www.microsoft.com/en-us/research/publication/the-implementation-of-functional-programming-languages/
+
+*** Types and Programming Languages
+
+- Types systems explained by building interpreters and proving attributes
+- Very "mathematical", but very complete
 
 * Thanks
 - Hope you enjoyed this talk and learned something new.
