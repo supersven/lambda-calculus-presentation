@@ -496,25 +496,64 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
 \onslide<+->{& \equiv & 0 }
 \end{align*}
 
-* (Almost) The End
-** Books
-#+LaTeX: \metroset{block=fill}
-*** Good Math :B_block:
-    :PROPERTIES:
-    :BEAMER_env: block
-    :END:
-- Easy to understand
-- Blog: http://www.goodmath.org/blog/
-
-*** The Implementation of Functional Programming Languages
-- How to compile to the Lambda Calculus?
-- Free: https://www.microsoft.com/en-us/research/publication/the-implementation-of-functional-programming-languages/
-
-*** Types and Programming Languages
-
-- Types systems explained by building interpreters and proving attributes
-- Very "mathematical", but very complete
-
-* Thanks
+* End
+** Thanks
 - Hope you enjoyed this talk and learned something new.
 - Hope it wasn't too much math and dusty formulas ... :)
+
+* Books						 :B_appendix:
+  :PROPERTIES:
+  :BEAMER_env: appendix
+  :END:
+** Good Math
+
+*** Image :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./good_math.jpg]]
+
+*** Description                                                    :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+/"A Geek's Guide to the Beauty of Numbers, Logic, and Computation"/
+- Easy to understand
+
+** The Implementation of Functional Programming Languages
+*** Image                                                          :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./the-implementation-of-functional-programming-languages.jpg]]
+
+*** Description                                                       :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+- How to compile to the Lambda Calculus?
+- Out-of-print, but freely available
+  - \small{https://www.microsoft.com/en-us/research/publication/the-implementation-of-functional-programming-languages/}
+
+** Types and Programming Languages
+
+*** Image                                                          :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./types-and-programming-languages.jpg]]
+
+*** Description                                                       :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+- Types systems explained by building interpreters and proving properties
+- Very "mathematical", but very complete and self-contained
+
+
