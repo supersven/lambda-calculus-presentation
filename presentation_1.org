@@ -106,10 +106,10 @@ s \ t \ u \equiv (s \ t) \ u
 *** /Bound/ and /free/
 - $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
 - $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
-- $\lambda x$, $\lambda y$ :: /binder/
+- $\lambda x$, $\lambda y$ :: /binders/
 #+BEAMER: \pause
-*** A term with no free variables is /"closed"/
-- A /"combinator"/
+*** A term with no free variables is /closed/
+- A /combinator/
 - $id \equiv \lambda x . x$
 - Y, S, K, I ...
 
@@ -129,8 +129,8 @@ s \ t \ u \equiv (s \ t) \ u
 ** Currying
 
 *** Idea
-- Take a funktion with $n$ arguments
-- Create a funktion that takes one argument and returns a function with $n-1$ arguments
+- Take a function with $n$ arguments
+- Create a function that takes one argument and returns a function with $n-1$ arguments
 
 #+BEAMER: \pause
 
@@ -180,7 +180,7 @@ Iff (if and only if) $x$ is not free in $f$:
 (\lambda x . \underbrace{(\lambda y . y)}_{f} \ x) \ a \to_\eta \underbrace{(\lambda y . y)}_{f} \ a
 \end{gather*}
 
-If $x$ is free in $f$, no \eta conversion possible:
+If $x$ is free in $f$, \eta conversion not possible:
 \begin{equation*}
 \lambda x . (\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x}) \ x \not\to_\eta ( \lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})
 \end{equation*}
@@ -247,8 +247,8 @@ How to write a good test if the next step could be several expressions?
   - like Normal Order Reduction, but NO reductions inside Abstractions
     - Abstractions are values
   - lazy, non-strict
-  - Parameters are NOT evaluated before they are used
-  - Optimization: Save result \to /Call-by-Need/
+    - Parameters are NOT evaluated before they are used
+  - Optimization: Save results \to /Call-by-Need/
 
 ** Call-by-Value
 \begin{align*}
@@ -260,10 +260,10 @@ How to write a good test if the next step could be several expressions?
 
 *** Call-by-Value
   - Outer-most, only if right-hand side was reduced to a value 
-    - Parameters ARE evaluated before they are used
   - NO reductions inside Abstractions
     - Abstractions are values
   - eager, strict
+    - Parameters ARE evaluated before they are used
 
 * Church Encodings
 ** Church Encodings
@@ -278,7 +278,7 @@ id \ y \to  y
 \end{gather*}
 
 ** Booleans
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -295,7 +295,7 @@ test & \equiv &
  c \ t \ f }
 \end{align*}
 #+BEAMER: \pause
-** Example                                                         :B_column:
+*** Example                                                        :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -312,7 +312,7 @@ test & \equiv &
 \end{align*}
 
 ** And
-** Definitions                                                     :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -326,7 +326,7 @@ and & \equiv & \lambda p . \lambda q . p \ q \ p
 }
 \end{align*}
 
-** Example                                                         :B_column:
+*** Example                                                        :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -347,7 +347,7 @@ and & \equiv & \lambda p . \lambda q . p \ q \ p
 \end{equation*}
 
 ** Pairs
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -360,7 +360,7 @@ second & \equiv & (\lambda p. p) \ \lambda x . \lambda y . y
 }
 \end{align*}
 
-** Example                                                         :B_column:
+*** Example                                                        :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -374,7 +374,7 @@ second & \equiv & (\lambda p. p) \ \lambda x . \lambda y . y
 \end{align*}
 
 ** Pairs (continued)
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -386,7 +386,7 @@ pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
 }
 \end{align*}
 
-** Example :B_column:
+*** Example                                                        :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -403,7 +403,7 @@ pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
 
 # TODO Is pair_{ab} equivalent to it's reduced result?
 ** Numerals
-** Peano axioms  :B_block:BMCOL:
+*** Peano axioms                                              :B_block:BMCOL:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -415,7 +415,7 @@ Every natural number can be defined with $0$ and a successor function
 2 & \equiv & \lambda f. \lambda x. f \ (f \ x) \\
 3 & \equiv & \lambda f. \lambda x. f \ (f \ (f \ x)) \\
 \end{align*}
-** Meaning  :B_block:BMCOL:
+*** Meaning                                                   :B_block:BMCOL:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -426,7 +426,7 @@ Every natural number can be defined with $0$ and a successor function
 
 ** Numerals Example - Successor
 
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -442,7 +442,7 @@ successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)
 }
 \end{align*}
 
-** Example                                                         :B_column:
+*** Example                                                        :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -457,7 +457,7 @@ successor & \equiv & \lambda n.  \lambda f. \lambda x. f \ (n \ f \ x)
 \onslide<+(2)->{& \equiv & 2}
 \end{align*}
 
-** Note                                                             :B_block:
+*** Note                                                            :B_block:
    :PROPERTIES:
    :BEAMER_act: <8->
    :BEAMER_env: block
@@ -466,7 +466,7 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
 
 ** Numerals Example - 0 + 0
 
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
@@ -477,7 +477,7 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
 \onslide<+->{plus & \equiv & \lambda m. \lambda n. \lambda f. \lambda x. m \ f \ (n \ f \ x) }
 \end{align*}
 
-** Definitions :B_column:
+*** Definitions                                                    :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: column
