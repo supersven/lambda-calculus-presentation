@@ -25,13 +25,13 @@
 ** Why should I care?
 - Simple Computational Model
   - to describe structure and behaviour (E.g. Operational Semantics, Type Systems)
-  - to reason and proove
+  - to reason and prove
 #+BEAMER: \pause
 - Explains why things in FP are like they are
-  - pure functions
-  - higher-order functions
-  - currying
-  - lazy evaluation
+  - Pure Functions
+  - Higher-Order Functions
+  - Currying
+  - Lazy Evaluation
 #+BEAMER: \pause
 - Understand FP Compilers
   - Introduce FP stuff into other languages
@@ -78,14 +78,14 @@ t ::= & & \text{Terms:} \\
 \begin{equation*}
 \underbrace{\underbrace{(\underbrace{\lambda x . \underbrace{\lambda y . \underbrace{x \ y}_{Application}}_{Abstraction}}_{Abstraction}) \underbrace{a}_{Variable}}_{Application} \  \underbrace{b}_{Variable}}_{Application}
 \end{equation*}
-#+BEAMER: \pause
+
 \begin{align*}
-& (\lambda \colorbox{orange!50}{x} . \lambda y . \colorbox{orange!50}{x} \ y) \colorbox{orange!50}{a} b \\
-\onslide<3->{\to & (\lambda \colorbox{cyan!50}{y} . a \ \colorbox{cyan!50}{y}) \colorbox{cyan!50}{b} \\}
+\onslide<2->{& (\lambda \colorbox{orange!50}{x} . \lambda y . \colorbox{orange!50}{x} \ y) \colorbox{orange!50}{a} b } \\
+\onslide<3->{\to & (\lambda \colorbox{cyan!50}{y} . a \ \colorbox{cyan!50}{y}) \colorbox{cyan!50}{b} } \\
 \onslide<4->{\to & a \ b}
 \end{align*}
 
-Parentheses are not part of the grammer? See next slide... :)
+@@beamer:<1->@@Parentheses are not part of the grammer? See next slide... :)
 
 ** Notational Conventions
 - We use parentheses to clearify what's meant
@@ -103,9 +103,9 @@ s \ t \ u \equiv (s \ t) \ u
 \lambda x . \lambda y . x \ y \ z
 \end{equation*}
 
-*** /Bound/ and /free/
+*** /Bound/ and /Free/
 - $\lambda y$ :: $y$ is /bound/, $x$ and $z$ are /free/
-- $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is free
+- $\lambda x$ :: $x$ and $y$ are /bound/, $z$ is /free/
 - $\lambda x$, $\lambda y$ :: /binders/
 #+BEAMER: \pause
 *** A term with no free variables is /closed/
@@ -151,7 +151,7 @@ s \ t \ u \equiv (s \ t) \ u
   - If you want to sound smart: Schönfinkeling
 
 ** Reductions and Conversions
-*** Alpha conversion                                               :B_column:
+*** Alpha Conversion                                               :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -162,7 +162,7 @@ s \ t \ u \equiv (s \ t) \ u
 
 #+BEAMER: \pause
 
-*** Beta reduction                                                 :B_column:
+*** Beta Reduction                                                 :B_column:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -173,16 +173,16 @@ s \ t \ u \equiv (s \ t) \ u
 
 #+BEAMER: \pause
 
-*** Eta conversion
+*** Eta Conversion
 Iff (if and only if) $x$ is not free in $f$:
 \begin{gather*}
 \lambda x . f \ x \to_\eta f \\
 (\lambda x . \underbrace{(\lambda y . y)}_{f} \ x) \ a \to_\eta \underbrace{(\lambda y . y)}_{f} \ a
 \end{gather*}
-
+#+BEAMER: \pause
 If $x$ is free in $f$, \eta conversion not possible:
 \begin{equation*}
-\lambda x . (\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x}) \ x \not\to_\eta ( \lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})
+\lambda x . \underbrace{(\lambda y . y \ \overset{\substack{\text{Bound} \\ \downarrow}}{x})}_{f} \ x \not\to_\eta ( \lambda y . y \ \overset{\substack{\text{Free?!} \\ \downarrow}}{x})
 \end{equation*}
 
 ** Remarks
@@ -244,10 +244,10 @@ How to write a good test if the next step could be several expressions?
 \end{align*}
 
 *** Call-by-Name
-  - like Normal Order Reduction, but NO reductions inside Abstractions
+  - like Normal Order Reduction, but *no reductions inside Abstractions*
     - Abstractions are values
   - lazy, non-strict
-    - Parameters are NOT evaluated before they are used
+    - *Parameters are not evaluated before they are used*
   - Optimization: Save results \to /Call-by-Need/
 
 ** Call-by-Value
@@ -260,10 +260,10 @@ How to write a good test if the next step could be several expressions?
 
 *** Call-by-Value
   - Outer-most, only if right-hand side was reduced to a value 
-  - NO reductions inside Abstractions
+  - *No reductions inside Abstractions*
     - Abstractions are values
   - eager, strict
-    - Parameters ARE evaluated before they are used
+    - *Parameters are evaluated before they are used*
 
 * Church Encodings
 ** Church Encodings
@@ -368,7 +368,7 @@ second & \equiv & (\lambda p. p) \ \lambda x . \lambda y . y
 \begin{align*} 
 \onslide<3->{pair_{AB} & \equiv & \alert<4->{pair}  \ a \ b } \\
 \onslide<5->{& \equiv & \alert<6->{(\lambda x. \lambda y . \lambda z . z\ x\ y) \ a } \ b } \\
-\onslide<7->{& \to & \alert<8->{(\lambda y . \lambda z . z\  a\ y) b } } \\
+\onslide<7->{& \to & \alert<8->{(\lambda y . \lambda z . z\  a\ y) \ b } } \\
 \onslide<9->{& \to & \lambda z . z\  a \ b } \\
 \onslide<10->{& \equiv & pair'_{ab} } \\
 \end{align*}
@@ -403,7 +403,7 @@ pair'_{ab} & \equiv & \lambda z . z\  a \ b \\
 
 # TODO Is pair_{ab} equivalent to it's reduced result?
 ** Numerals
-*** Peano axioms                                              :B_block:BMCOL:
+*** Peano Axioms                                              :B_block:BMCOL:
    :PROPERTIES:
    :BEAMER_col: 0.45
    :BEAMER_env: block
@@ -420,9 +420,9 @@ Every natural number can be defined with $0$ and a successor function
    :BEAMER_col: 0.45
    :BEAMER_env: block
    :END:
-  - $0$ :: $f$ is evaluated $0$ times
-  - $1$ :: $f$ is evaluated once
-  - $x$ :: can be every lambda term
+- $0$ :: $f$ is evaluated $0$ times
+- $1$ :: $f$ is evaluated once
+- $x$ :: can be every lambda term
 
 ** Numerals Example - Successor
 
