@@ -80,9 +80,9 @@ t ::= & & \text{Terms:} \\
 \end{equation*}
 
 \begin{align*}
-\onslide<2->{& (\lambda \colorbox{orange!50}{x} . \lambda y . \colorbox{orange!50}{x} \ y) \colorbox{orange!50}{a} b } \\
-\onslide<3->{\to & (\lambda \colorbox{cyan!50}{y} . a \ \colorbox{cyan!50}{y}) \colorbox{cyan!50}{b} } \\
-\onslide<4->{\to & a \ b}
+\onslide<2->{    & ( \lambda \color<3->{orange}{x} . &    \lambda y                     .     & \color<3->{orange}{x} & y                     & ) & \color<3->{orange}{a} & & b } \\
+\onslide<4->{\to &                                   & ( \lambda \color<5->{cyan}{y}    .     & \color{orange}{a}     & \color<5->{cyan}{y}   & ) &                       & & \color<5->{cyan}{b} } \\
+\onslide<6->{\to &                                   &                                        & \color{orange}{a}     & \color{cyan}{b}       &   &                       & & }
 \end{align*}
 
 @@beamer:<1->@@Parentheses are not part of the grammer? See next slide... :)
@@ -209,7 +209,7 @@ If $x$ is free in $f$, \eta conversion not possible:
 
 \begin{equation*}
 \underbrace{
-(\lambda x.x) \ (\underbrace{(\lambda x.x) \ (\lambda z.\underbrace{(\lambda x.x) \ z}_{RedEx})}_{RedEx})
+(\lambda x.x) \ (\underbrace{(\lambda y.y) \ (\lambda z.\underbrace{(\lambda a.a) \ z}_{RedEx})}_{RedEx})
 }_{RedEx}
 \end{equation*}
 #+BEAMER: \pause
@@ -226,9 +226,9 @@ How to write a good test if the next step could be several expressions?
 
 ** Normal Order Reduction
 \begin{align*}
-\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
-\onslide<5->{\to & \lambda z.\alert<6->{(\lambda x.x) \ z } \\ }
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda y.y) \ (\lambda z.(\lambda a.a) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda y.y) \ (\lambda z.(\lambda a.a) \ z) } \\ }
+\onslide<5->{\to & \lambda z.\alert<6->{(\lambda a.a) \ z } \\ }
 \onslide<7->{\to & \lambda z.z }
 \end{align*}
 
@@ -237,9 +237,9 @@ How to write a good test if the next step could be several expressions?
 
 ** Call-by-Name
 \begin{align*}
-\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{\to & \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z) } \\ }
-\onslide<5->{\to & \lambda z.(\lambda x.x) \ z  \\ }
+\onslide<1->{ & \alert<2->{ (\lambda x.x) \ ((\lambda y.y) \ (\lambda z.(\lambda a.a) \ z)) } \\ }
+\onslide<3->{\to & \alert<4->{(\lambda y.y) \ (\lambda z.(\lambda a.a) \ z) } \\ }
+\onslide<5->{\to & \lambda z.(\lambda a.a) \ z  \\ }
 \onslide<6->{\not\to}
 \end{align*}
 
@@ -252,9 +252,9 @@ How to write a good test if the next step could be several expressions?
 
 ** Call-by-Value
 \begin{align*}
-\onslide<1->{ &  (\lambda x.x) \ \alert<2->{((\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)) } \\ }
-\onslide<3->{ \to &  \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda x.x) \ z)} \\ }
-\onslide<5->{ \to &  \lambda z.(\lambda x.x) \ z \\ }
+\onslide<1->{ &  (\lambda x.x) \ \alert<2->{((\lambda y.y) \ (\lambda z.(\lambda a.a) \ z)) } \\ }
+\onslide<3->{ \to &  \alert<4->{(\lambda x.x) \ (\lambda z.(\lambda a.a) \ z)} \\ }
+\onslide<5->{ \to &  \lambda z.(\lambda a.a) \ z \\ }
 \onslide<6->{\not \to}
 \end{align*}
 
