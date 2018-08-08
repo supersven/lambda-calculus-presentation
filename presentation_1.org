@@ -74,18 +74,32 @@ t ::= & & \text{Terms:} \\
 \underbrace{(\underbrace{function \ (x)\{return \ x;\}}_{Abstraction}) \ (\underbrace{y}_{Variable})}_{Application}
 \end{equation*}
 
-** Evaluation / Reduction
-\begin{equation*}
-\underbrace{\underbrace{(\underbrace{\lambda x . \underbrace{\lambda y . \underbrace{x \ y}_{Application}}_{Abstraction}}_{Abstraction}) \underbrace{a}_{Variable}}_{Application} \  \underbrace{b}_{Variable}}_{Application}
-\end{equation*}
+** Example - $(\lambda x . \lambda y . x \ y) \ a \  b$
+*** Abstractions
+Think: Function Definitions
 
+$(\underline{\lambda x . \underline{\lambda y . x \ y }}) \ a \  b$
+
+#+BEAMER: \pause
+
+*** Variables
+Think: Parameters
+
+$(\lambda x . \lambda y . \underline{x} \ \underline{y}) \ \underline{a} \  \underline{b}$
+
+#+BEAMER: \pause
+
+*** Applications
+Think: Function Calls
+
+$\lefteqn{\underline{\phantom{ (\lambda x . \lambda y . \underline{x \ y}) \ a }}} \lefteqn{(\lambda x . \lambda y . \underline{x \ y}) \ \underline{a \ b}}$
+
+** Example - Evaluation
 \begin{align*}
-\onslide<2->{    & ( \lambda \color<3->{orange}{x} . &    \lambda y                     .     & \color<3->{orange}{x} & y                     & ) & \color<3->{orange}{a} & & b } \\
-\onslide<4->{\to &                                   & ( \lambda \color<5->{cyan}{y}    .     & \color{orange}{a}     & \color<5->{cyan}{y}   & ) &                       & & \color<5->{cyan}{b} } \\
-\onslide<6->{\to &                                   &                                        & \color{orange}{a}     & \color{cyan}{b}       &   &                       & & }
+\onslide<1->{    & ( \lambda \color<3->{orange}{x} . &    \lambda y                     .     & \color<3->{orange}{x} & y                     & ) & \color<3->{orange}{a} & & b & & \onslide<2->{ \text{Substitute $x \mapsto a $}} } \\
+\onslide<4->{\to &                                   & ( \lambda \color<6->{cyan}{y}    .     & \color{orange}{a}     & \color<6->{cyan}{y}   & ) &                       & & \color<6->{cyan}{b} & & \onslide<5->{\text{Substitute $y \mapsto b$}} } \\
+\onslide<7->{\to &                                   &                                        & \color{orange}{a}     & \color{cyan}{b}       &   &                       & &  & &}
 \end{align*}
-
-@@beamer:<1->@@Parentheses are not part of the grammer? See next slide... :)
 
 ** Notational Conventions
 - We use parentheses to clearify what's meant
