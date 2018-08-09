@@ -94,7 +94,7 @@ Think: Function Calls
 
 $\lefteqn{\underline{\phantom{ (\lambda x . \lambda y . \underline{x \ y}) \ a }}} \lefteqn{(\lambda x . \lambda y . \underline{x \ y}) \ \underline{a \ b}}$
 
-** Example - Evaluation
+** Example - $(\lambda x . \lambda y . x \ y) \ a \  b$
 \begin{align*}
 \onslide<1->{    & ( \lambda \color<3->{orange}{x} . &    \lambda y                     .     & \color<3->{orange}{x} & y                     & ) & \color<3->{orange}{a} & & b & & \onslide<2->{ \text{Substitute $x \mapsto a $}} } \\
 \onslide<4->{\to &                                   & ( \lambda \color<6->{cyan}{y}    .     & \color{orange}{a}     & \color<6->{cyan}{y}   & ) &                       & & \color<6->{cyan}{b} & & \onslide<5->{\text{Substitute $y \mapsto b$}} } \\
