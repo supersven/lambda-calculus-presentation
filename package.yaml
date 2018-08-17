@@ -21,18 +21,23 @@ dependencies:
 - base >= 4.7 && < 5
 
 library:
-  source-dirs: src
-  dependencies:
-    containers >= 0.5.10.2
-    MissingH >= 1.4.0.1
-    
+    source-dirs: src
+    dependencies:
+      - containers >= 0.5.10.2
+      - extra >= 1.6.9
+    exposed-modules:
+      - TypedCheck
+      - UntypedEval
+
 tests:
   lambda-calculus-presentation-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - lambda-calculus-presentation
+      - lambda-calculus-presentation
+      - hspec >= 2.4.8
+      - containers >= 0.5.10.2
