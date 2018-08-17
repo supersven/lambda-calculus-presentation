@@ -22,8 +22,10 @@ dependencies:
 
 library:
   source-dirs: src
-  dependencies: containers >= 0.5.10.2
-
+  dependencies:
+    containers >= 0.5.10.2
+    MissingH >= 1.4.0.1
+    
 tests:
   lambda-calculus-presentation-test:
     main:                Spec.hs
