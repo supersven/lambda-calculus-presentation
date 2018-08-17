@@ -6,3 +6,6 @@
 *.out
 *.snm
 *.toc
+.stack-work/
+lambda-calculus-presentation.cabal
+*~
