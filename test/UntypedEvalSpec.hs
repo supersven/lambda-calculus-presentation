@@ -15,10 +15,10 @@ spec = do
      (eval (Map.singleton "a" (Abstraction "x" (Variable "x"))) (Variable "a")) `shouldBe` Just (Abstraction "x" (Variable "x"))
 
   describe "Abstractions" $ do
-    it "" $
-     True `shouldBe` True
+    it "{} \\x -> x => \\x -> x" $
+     (eval Map.empty (Abstraction "x" (Variable "x"))) `shouldBe` Just (Abstraction "x" (Variable "x"))
 
   describe "Applications" $ do
-    it "" $
-     True `shouldBe` True
+    it "{} (\\x -> x) a => a" $
+     (eval Map.empty (Application (Abstraction "x" (Variable "x")) (Variable "a"))) `shouldBe` Just (Variable "a")
 

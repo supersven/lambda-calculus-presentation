@@ -28,7 +28,8 @@ library:
     exposed-modules:
       - TypedCheck
       - UntypedEval
-
+      - NaiveUntypedEval
+      
 tests:
   lambda-calculus-presentation-test:
     main:                Spec.hs

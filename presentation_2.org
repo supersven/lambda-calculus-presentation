@@ -1,6 +1,49 @@
+#+TITLE: Simply Typed Lambda Calculus
+#+AUTHOR: Sven Tennie
+#+EMAIL: sven.tennie@dreamit.de
+#+KEYWORDS: "Simply Typed Lambda Calculus"
+#+LANGUAGE:  en
+#+OPTIONS: tasks:nil toc:nil H:2
+#+BEAMER_THEME: metropolis
+#+BEAMER_HEADER: \subtitle{From Untyped to Simply Typed Lambda Calculus}
+#+BEAMER_HEADER: \institute[INST]{Dream IT\\\url{https://dreamit.de}}
+
+#+startup: beamer
+#+LaTeX_CLASS: beamer
 
 * Untyped Lambda Calculus
-** Interpreter
+** Naive Interpreter
+#+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
+  module NaiveUntypedEval where
+  import qualified Data.Map.Strict as Map
+
+  type Name = String
+
+  data Term = Variable Name |
+              Application Term Term |
+              Abstraction Name Term
+              deriving (Eq, Show)
+
+  eval :: Term -> Term
+  eval (Variable name) = Variable name
+  eval (Application term1 term2) = case eval term1 of
+    (Abstraction name term1') -> eval $ substitute name term2 term1'
+    term                    -> Application term term2
+  eval abstraction@(Abstraction _ _) = abstraction
+
+  substitute :: String -> Term -> Term -> Term
+  substitute name substitution (Variable varName) = if name == varName then
+                                                      substitution
+                                                    else
+                                                      Variable varName
+  substitute name substitution (Application term1 term2) = Application (substitute name substitution term1)  (substitute name substitution term2)
+  substitute name substitution (Abstraction varName term) = if name == varName then
+                                                              Abstraction varName term
+                                                            else
+                                                              Abstraction varName (substitute name substitution term)
+#+END_SRC
+
+** Interpreter with Environment
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   module UntypedEval where
   import qualified Data.Map.Strict as Map
@@ -13,19 +56,19 @@
               Abstraction Name Term
               deriving (Eq, Show)
 
-  eval ::Environment -> Term -> Maybe Term
+  eval :: Environment -> Term -> Maybe Term
   eval env (Variable name) = find env name
-  eval env (Application term1 term2) = case term1 of
-    (Abstraction name _) -> eval (Map.insert name term2 env) term1
-    _ -> Nothing
-  eval _ abstraction@(Abstraction _ _) = Just abstraction
+  eval env (Application term1 term2) = case eval env term1 of
+    Just (Abstraction name term) -> eval (Map.insert name term2 env) term
+    Just term                    -> Just (Application term term2)
+    Nothing -> Nothing
+  eval env abstraction@(Abstraction _ _) = Just abstraction
 
   find ::  Environment -> Name -> Maybe Term
   find env name = Map.lookup name env
 #+END_SRC
 
 ** Tests
-
 * Simply Typed Lambda Calculus
 
 ** Interpreter
