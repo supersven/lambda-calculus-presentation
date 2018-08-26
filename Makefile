@@ -1,22 +1,28 @@
 PDFS = $(patsubst %.org, %.pdf, $(wildcard *.org))
 
 .DEFAULT_GOAL := default
-.PHONY: tangle test
+.PHONY: tangle test dot
 
 tangle: *.org
-	$(foreach org-file, $^, emacs --batch --find-file $(org-file) --funcall org-babel-tangle --kill)
+	$(foreach org-file, $^, emacs --batch -l init.el --find-file $(org-file) --funcall org-babel-tangle --kill)
 
 %.tex: %.org
-	emacs --batch --find-file $< --funcall org-beamer-export-to-latex --kill
+	emacs --batch -l init.el --find-file $< --funcall org-beamer-export-to-latex --kill
 
 %.pdf: %.tex
-	pdflatex $<
+	xelatex -shell-escape $<
+
+%.ps: %.dot
+	dot -O -Tps $<
+
+dot: $(patsubst %.dot, %.ps, $(wildcard dot/*.dot))
+	echo $<
 
 test: tangle
 	stack test
 
 .PHONY: all
-default: test $(PDFS)
+default: test dot $(PDFS)
 
 .PHONY: clean
 clean:

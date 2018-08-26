@@ -7,15 +7,64 @@
 #+BEAMER_THEME: metropolis
 #+BEAMER_HEADER: \subtitle{From Untyped to Simply Typed Lambda Calculus}
 #+BEAMER_HEADER: \institute[INST]{Dream IT\\\url{https://dreamit.de}}
-
 #+startup: beamer
 #+LaTeX_CLASS: beamer
+#+LaTeX_HEADER: \usemintedstyle{tango}
+#+LaTeX_HEADER: \usepackage{fontspec}
+#+LaTeX_HEADER: \setmonofont[Contextuals={Alternate}]{Fira Code}
+#+LaTeX_HEADER: \newminted{haskell}{fontsize=\tiny}
 
 * Untyped Lambda Calculus
+** Untyped Lambda Calculus - Retrospection
+*** We can boil down computation to a tiny calculus
+*** All we need is:
+- Function Definition / *Abstraction* ($\lambda x . e$)
+- Function *Application* ($e e$)
+- Parameters / *Variables* ($x$)
+*** Then we get:
+- Booleans
+- Numerals
+- Data Structures
+- Control Flow
+- ...
+- *Turing Completeness* (If it can be computed, it can be computed in Lambda Calculus!)
+
+** Build an Interpreter
+*** Let's build an intepreter
+- Deepen our intiution
+- Later move on to the /Simply Typed Lambda Calculus/
+  - Why do we need types?
+  - How does a type checker work?
+  - How does it restrict the programs we might write?
+
+- On our way we'll learn some math mumbo-jumbo: /Natural Deduction/
+  - Found in many papers about Type Systems and Programming Language Evaluation
+
+** Structure
+\begin{align*}
+t ::= & & \text{Terms:} \\
+& \ x & \text{Variable} \\
+& \ \lambda x.t & \text{Abstraction} \\
+& \ t \ t & \text{Application}
+\end{align*}
+
+** Abstract Syntax Tree
+#+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dot.ps :tangle dot/untyped_lambda_calculus_ast.dot
+digraph untyped_lambda_calculus_ast {
+  A [shape = "circle",style=filled, fillcolor=yellow];
+}
+#+END_SRC
+
+#+attr_latex: :width 2cm
+#+RESULTS:
+[[file:dot/untyped_lambda_calculus_ast.dot.ps]]
+
+** Evaluation
+
+
 ** Naive Interpreter
 #+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
   module NaiveUntypedEval where
-  import qualified Data.Map.Strict as Map
 
   type Name = String
 
@@ -25,11 +74,11 @@
               deriving (Eq, Show)
 
   eval :: Term -> Term
-  eval (Variable name) = Variable name
+  eval variable@(Variable _) = variable
+  eval abstraction@(Abstraction _ _) = abstraction
   eval (Application term1 term2) = case eval term1 of
     (Abstraction name term1') -> eval $ substitute name term2 term1'
     term                    -> Application term term2
-  eval abstraction@(Abstraction _ _) = abstraction
 
   substitute :: String -> Term -> Term -> Term
   substitute name substitution (Variable varName) = if name == varName then

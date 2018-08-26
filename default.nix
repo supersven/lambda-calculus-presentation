@@ -11,16 +11,21 @@ with import <nixpkgs> {};
               ulem
               capt-of
               cm-super
-#              inputenc
-#              fontenc
-#              graphicx
-#              grffile
-#              longtable
-#              rotating
-#              normalem
-#              textcomp
-#              amssymb
               hyperref
+              minted
+              fvextra
+              fancyvrb
+              upquote
+              lineno
+              ifplatform
+              xstring
+              framed
+              caption
+              pgfopts
+              float
+              marvosym
+              wasysym
+              fontspec
               ;
     };
   in
@@ -28,6 +33,6 @@ with import <nixpkgs> {};
   stdenv.mkDerivation rec {
     name = "env";
     buildInputs = [
-      tex
+      tex python36Packages.pygments emacs25 graphviz
     ];
 }

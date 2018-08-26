@@ -1,0 +1,4 @@
+
+digraph untyped_lambda_calculus_ast {
+  A [shape = "circle",style=filled, fillcolor=yellow];
+}
