@@ -1,22 +1,19 @@
 
 module UntypedEval where
+
+import UntypedSyntax
+
 import qualified Data.Map.Strict as Map
 
-type Name = String
-type Environment = Map.Map Name Term
+type Environment = Map.Map Name Expr
 
-data Term = Variable Name |
-            Application Term Term |
-            Abstraction Name Term
-            deriving (Eq, Show)
-
-eval :: Environment -> Term -> Maybe Term
-eval env (Variable name) = find env name
-eval env (Application term1 term2) = case eval env term1 of
-  Just (Abstraction name term) -> eval (Map.insert name term2 env) term
-  Just term                    -> Just (Application term term2)
+eval :: Environment -> Expr -> Maybe Expr
+eval env (Var name) = find env name
+eval env (App term1 term2) = case eval env term1 of
+  Just (Lambda name term) -> eval (Map.insert name term2 env) term
+  Just term                    -> Just (App term term2)
   Nothing -> Nothing
-eval env abstraction@(Abstraction _ _) = Just abstraction
+eval env lambda@(Lambda _ _) = Just lambda
 
-find ::  Environment -> Name -> Maybe Term
+find ::  Environment -> Name -> Maybe Expr
 find env name = Map.lookup name env

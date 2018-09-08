@@ -29,6 +29,7 @@ library:
       - TypedCheck
       - UntypedEval
       - NaiveUntypedEval
+      - UntypedSyntax
       
 tests:
   lambda-calculus-presentation-test:

@@ -11,11 +11,12 @@
 #+LaTeX_CLASS: beamer
 #+LaTeX_HEADER: \usemintedstyle{tango}
 #+LaTeX_HEADER: \usepackage{fontspec}
-#+LaTeX_HEADER: \setmonofont[Contextuals={Alternate}]{Fira Code}
-#+LaTeX_HEADER: \newminted{haskell}{fontsize=\tiny}
+# #+LaTeX_HEADER: \setmonofont[Contextuals={Alternate}]{Fira Code}
+#+LaTeX_HEADER: \newminted{haskell}{fontsize=\tiny,mathescape=true}
+#+LaTeX_HEADER: \setminted[haskell]{fontsize=\tiny,mathescape=true}
 
 * Untyped Lambda Calculus
-** Untyped Lambda Calculus - Retrospection
+** Untyped Lambda Calculus - Recapitulation
 *** We can boil down computation to a tiny calculus
 *** All we need is:
 - Function Definition / *Abstraction* ($\lambda x . e$)
@@ -30,7 +31,7 @@
 - *Turing Completeness* (If it can be computed, it can be computed in Lambda Calculus!)
 
 ** Build an Interpreter
-*** Let's build an intepreter
+*** Let's build an interpreter
 - Deepen our intiution
 - Later move on to the /Simply Typed Lambda Calculus/
   - Why do we need types?
@@ -42,78 +43,132 @@
 
 ** Structure
 \begin{align*}
-t ::= & & \text{Terms:} \\
+e ::= & & \text{Expressions:} \\
 & \ x & \text{Variable} \\
 & \ \lambda x.t & \text{Abstraction} \\
 & \ t \ t & \text{Application}
 \end{align*}
 
 ** Abstract Syntax Tree
+$(\lambda x . \lambda y . x \ y) \ a \ b$
 #+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dot.ps :tangle dot/untyped_lambda_calculus_ast.dot
 digraph untyped_lambda_calculus_ast {
-  A [shape = "circle",style=filled, fillcolor=yellow];
+  A [label = "Application"];
+  B [label = "Application"];
+  C [label = "Lambda"];
+  D [label = "Lambda"];
+  E [label = "Application"];
+  F [label = "Variable a"];
+  G [label = "Variable b"];
+  H [label = "Parameter x"];
+  I [label = "Parameter y"];
+  J [label = "Variable x"];
+  K [label = "Variable y"];
+  
+  A -> {B G}
+  B -> {C F}
+  C -> {H D}
+  D -> {I E}
+  E -> {J K}
 }
 #+END_SRC
 
-#+attr_latex: :width 2cm
+#+attr_latex: :height 5cm
 #+RESULTS:
 [[file:dot/untyped_lambda_calculus_ast.dot.ps]]
 
-** Evaluation
-
-
-** Naive Interpreter
-#+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
-  module NaiveUntypedEval where
+** Interpreter - Syntax
+#+BEGIN_SRC haskell :tangle src/UntypedSyntax.hs
+  module UntypedSyntax where
 
   type Name = String
 
-  data Term = Variable Name |
-              Application Term Term |
-              Abstraction Name Term
-              deriving (Eq, Show)
+  data Expr
+    = Var Name
+    | App Expr
+          Expr
+    | Lambda Name
+             Expr
+    deriving (Eq, Show)
+#+END_SRC
 
-  eval :: Term -> Term
-  eval variable@(Variable _) = variable
-  eval abstraction@(Abstraction _ _) = abstraction
-  eval (Application term1 term2) = case eval term1 of
-    (Abstraction name term1') -> eval $ substitute name term2 term1'
-    term                    -> Application term term2
+** Interpreter - Syntax - Examples
 
-  substitute :: String -> Term -> Term -> Term
-  substitute name substitution (Variable varName) = if name == varName then
-                                                      substitution
-                                                    else
-                                                      Variable varName
-  substitute name substitution (Application term1 term2) = Application (substitute name substitution term1)  (substitute name substitution term2)
-  substitute name substitution (Abstraction varName term) = if name == varName then
-                                                              Abstraction varName term
-                                                            else
-                                                              Abstraction varName (substitute name substitution term)
+#+BEGIN_SRC haskell :tangle src/UntypedSyntaxExamples.hs
+  module UntypedSyntaxExamples where
+
+  import UntypedSyntax
+
+  -- $true \equiv \lambda p . \ lambda q . p$
+  true :: Expr
+  true = Lambda "p" (Lambda "q" (Var "p"))
+
+  -- $false \equiv \lambda p . \ lambda q . q$
+  false :: Expr
+  false = Lambda "p" (Lambda "q" (Var "p"))
+
+  -- $if\_then\_else \equiv \lambda p . \lambda a . \lambda b . p a b $
+  if_then_else :: Expr
+  if_then_else =
+    Lambda "p" (Lambda "a" (Lambda "b" (App (App (Var "p") (Var "a")) (Var "b"))))
+#+END_SRC
+
+** Evaluation Rules - Call by Value
+
+# \begin{array}{cl}
+# \displaystyle \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \trule{E-App1} \\ \\
+# \displaystyle \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \trule{E-App2} \\ \\
+# \displaystyle {(\lambda x . e) v \to [x / v] e } & \trule{E-AppLam} \\ \\
+# \end{array}
+
+** Interpreter - Evaluation
+#+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
+  module NaiveUntypedEval where
+
+  import UntypedSyntax
+
+  eval :: Expr -> Expr
+  eval variable@(Var _) = variable
+  eval lambda@(Lambda _ _) = lambda
+  eval (App term1 term2) =
+    case eval term1 of
+      (Lambda name term1') -> eval $ substitute name term2 term1'
+      term -> App term term2
+#+END_SRC
+
+** Interpreter - Substitution
+#+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
+  substitute :: String -> Expr -> Expr -> Expr
+  substitute name substitution var@(Var varName)
+    | name  == varName = substitution
+    | otherwise = var
+  substitute name substitution (App term1 term2) =
+    App (substitute name substitution term1) (substitute name substitution term2)
+  substitute name substitution (Lambda varName term) =
+    if name == varName
+      then Lambda varName term
+      else Lambda varName (substitute name substitution term)
 #+END_SRC
 
 ** Interpreter with Environment
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   module UntypedEval where
+
+  import UntypedSyntax
+
   import qualified Data.Map.Strict as Map
 
-  type Name = String
-  type Environment = Map.Map Name Term
+  type Environment = Map.Map Name Expr
 
-  data Term = Variable Name |
-              Application Term Term |
-              Abstraction Name Term
-              deriving (Eq, Show)
-
-  eval :: Environment -> Term -> Maybe Term
-  eval env (Variable name) = find env name
-  eval env (Application term1 term2) = case eval env term1 of
-    Just (Abstraction name term) -> eval (Map.insert name term2 env) term
-    Just term                    -> Just (Application term term2)
+  eval :: Environment -> Expr -> Maybe Expr
+  eval env (Var name) = find env name
+  eval env (App term1 term2) = case eval env term1 of
+    Just (Lambda name term) -> eval (Map.insert name term2 env) term
+    Just term                    -> Just (App term term2)
     Nothing -> Nothing
-  eval env abstraction@(Abstraction _ _) = Just abstraction
+  eval env lambda@(Lambda _ _) = Just lambda
 
-  find ::  Environment -> Name -> Maybe Term
+  find ::  Environment -> Name -> Maybe Expr
   find env name = Map.lookup name env
 #+END_SRC
 
