@@ -18,17 +18,33 @@
 * Untyped Lambda Calculus
 ** Untyped Lambda Calculus - Recapitulation
 *** We can boil down computation to a tiny calculus
+#+BEAMER: \pause
 *** All we need is:
 - Function Definition / *Abstraction* ($\lambda x . e$)
-- Function *Application* ($e e$)
+- Function *Application* ($e \ e$)
 - Parameters / *Variables* ($x$)
+#+BEAMER: \pause
 *** Then we get:
+**** PL constructs :B_column:
+     :PROPERTIES:
+     :BEAMER_col: 0.35
+     :BEAMER_env: block
+     :BEAMER_envargs: C[t]
+     :END:
 - Booleans
 - Numerals
 - Data Structures
 - Control Flow
 - ...
-- *Turing Completeness* (If it can be computed, it can be computed in Lambda Calculus!)
+#+BEAMER: \pause
+**** Turing Completeness :B_column:
+     :PROPERTIES:
+     :BEAMER_col: 0.55
+     :BEAMER_env: block
+     :BEAMER_envargs: C[t]
+     :END:
+- *Turing Completeness* 
+  - If it can be computed, it can be computed in Lambda Calculus!
 
 ** Build an Interpreter
 *** Let's build an interpreter
@@ -125,6 +141,7 @@ Some rules...
 
 ** Interpreter - Evaluation
 #+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
+
   module NaiveUntypedEval where
 
   import UntypedSyntax
