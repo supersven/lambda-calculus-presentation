@@ -1,35 +1,44 @@
 
 module TypedCheck where
 
-import qualified Data.Map.Strict as Map
 import Data.Either.Extra
+import qualified Data.Map.Strict as Map
 
-type Name = String
-type Environment = Map.Map Name Type
+import TypedSyntax
 
-data Type  = TInt
-           | TBool
-           | TArr Type Type
-           deriving (Eq, Show)
+find :: Environment -> Name -> Either String Type
+find env name = maybeToEither "Var not found!" (Map.lookup name env)
 
-data Term = Variable Name |
-              Application Term Term |
-              Abstraction Name Type Term
-              deriving (Eq, Show)
+check :: Environment -> Expr -> Either String Type
+--
+-- $ \Gamma \vdash n : \text{Int}  \quad  \text{(T-Int)} $
+--
+check _ (IntValue _) = Right TInt
+--
+-- $ \Gamma \vdash \text{True} : \text{Bool}  \quad  \text{(T-True)} $
+--
+check _ (BoolValue True) = Right TBool
+--
+-- $ \Gamma \vdash \text{False} : \text{Bool}  \quad   \text{(T-False)} $
+--
+check _ (BoolValue False) = Right TBool
+--
+-- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
+--
+check env (Var name) = find env name
 
-check :: Environment -> Term -> Either String Type
-check env (Variable name) = find env name
-check env (Application term1 term2) =
-  do
-    (TArr ta1 ta2) <- check env term1
-    t2 <- check env term2
-    if ta1 == t2 then
-      Right t2
-    else
-      Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)
-check env (Abstraction name atype term) = do
-  t <- check (Map.insert name atype env) term
+--
+-- $ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 }  \quad  \text{(T-Lam)} $
+--
+check env (Lambda name atype e) = do
+  t <- check (Map.insert name atype env) e
   return $ TArr atype t
-
-find ::  Environment -> Name -> Either String Type
-find env name = maybeToEither "Variable not found!" (Map.lookup name env)
+--
+-- $  \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2}  \quad  \text{(T-App)} $
+--
+check env (App e1 e2) = do
+  (TArr ta1 ta2) <- check env e1
+  t2 <- check env e2
+  if ta1 == t2
+    then Right ta2
+    else Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)

@@ -45,8 +45,8 @@
 \begin{align*}
 e ::= & & \text{Expressions:} \\
 & \ x & \text{Variable} \\
-& \ \lambda x.t & \text{Abstraction} \\
-& \ t \ t & \text{Application}
+& \ \lambda x.e & \text{Abstraction} \\
+& \ e \ e & \text{Application}
 \end{align*}
 
 ** Abstract Syntax Tree
@@ -114,12 +114,14 @@ digraph untyped_lambda_calculus_ast {
 #+END_SRC
 
 ** Evaluation Rules - Call by Value
+Some rules...
 
-# \begin{array}{cl}
-# \displaystyle \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \trule{E-App1} \\ \\
-# \displaystyle \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \trule{E-App2} \\ \\
-# \displaystyle {(\lambda x . e) v \to [x / v] e } & \trule{E-AppLam} \\ \\
-# \end{array}
+\begin{align*}
+ \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \quad & \text{E-App1} \\ \\
+ \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
+ {(\lambda x . e) v \to [x / v] e } & \quad & \text{E-AppLam} \\ \\
+\end{align*}
+
 
 ** Interpreter - Evaluation
 #+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
@@ -128,12 +130,21 @@ digraph untyped_lambda_calculus_ast {
   import UntypedSyntax
 
   eval :: Expr -> Expr
+  -- No rule for variables
   eval variable@(Var _) = variable
+  -- No rule for lambdas
   eval lambda@(Lambda _ _) = lambda
-  eval (App term1 term2) =
-    case eval term1 of
-      (Lambda name term1') -> eval $ substitute name term2 term1'
-      term -> App term term2
+  eval (App e1 e2)
+  -- $ \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} \quad (E-App1) $
+   =
+    let e1' = eval e1
+  -- $ \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} \quad (E-App2) $
+     in let e2' = eval e2
+         in case e1'
+                  of
+  -- $ {(\lambda x . e) v \to [x / v] e } \quad (E-AppLam) $
+              (Lambda name e1'_body) -> eval $ substitute name e2' e1'_body
+              e1' -> App e1' e2'
 #+END_SRC
 
 ** Interpreter - Substitution
@@ -174,44 +185,111 @@ digraph untyped_lambda_calculus_ast {
 
 ** Tests
 * Simply Typed Lambda Calculus
+** Structure
+\begin{align*}
+e ::= & & \text{Expressions:} \\
+& \ x & \text{Variable} \\
+& \ \lambda x:\tau.e & \text{Abstraction} \\
+& \ e \ e & \text{Application}
+\end{align*}
+** Progress and Preservation
+*** **Progress** :  If an expression is well typed then either it is a value, or it can be further evaluated by an available evaluation rule.
+*** **Preservation** : If an expression $e$ has type $\tau$, and is evaluated to $e'$, then $e'$ has type $\tau$.
+
+** Evaluation
+*** Dynamic rules stay the same!
+    - Type checking is done upfront
 
 ** Interpreter
+
+
+** Typing Rules
+\begin{align*}
+ \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
+ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 } & \quad & \text{T-Lam} \\ \\
+ \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2} & \quad & \text{T-App} \\ \\
+ \Gamma \vdash n : \text{Int} & \quad & \text{T-Int} \\ \\
+ \Gamma \vdash \text{True} : \text{Bool} & \quad & \text{T-True} \\ \\
+ \Gamma \vdash \text{False} : \text{Bool} & \quad  & \text{T-False} \\ \\
+\end{align*}  
+
 ** Type Checker
+#+BEGIN_SRC haskell :tangle src/TypedSyntax.hs
+  module TypedSyntax where
+
+  import qualified Data.Map.Strict as Map
+
+  type Name = String
+
+  type Environment = Map.Map Name Type
+
+  data Type
+    = TInt
+    | TBool
+    | TArr Type
+           Type
+    deriving (Eq, Show)
+
+  data Expr
+    = IntValue Int
+    | BoolValue Bool
+    | Var Name
+    | App Expr
+          Expr
+    | Lambda Name
+             Type
+             Expr
+    deriving (Eq, Show)
+
+#+END_SRC
+
+** Type Checker - Literals & Variables
 #+BEGIN_SRC haskell :tangle src/TypedCheck.hs
   module TypedCheck where
 
-  import qualified Data.Map.Strict as Map
   import Data.Either.Extra
+  import qualified Data.Map.Strict as Map
 
-  type Name = String
-  type Environment = Map.Map Name Type
+  import TypedSyntax
 
-  data Type  = TInt
-             | TBool
-             | TArr Type Type
-             deriving (Eq, Show)
+  find :: Environment -> Name -> Either String Type
+  find env name = maybeToEither "Var not found!" (Map.lookup name env)
 
-  data Term = Variable Name |
-                Application Term Term |
-                Abstraction Name Type Term
-                deriving (Eq, Show)
-
-  check :: Environment -> Term -> Either String Type
-  check env (Variable name) = find env name
-  check env (Application term1 term2) =
-    do
-      (TArr ta1 ta2) <- check env term1
-      t2 <- check env term2
-      if ta1 == t2 then
-        Right t2
-      else
-        Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)
-  check env (Abstraction name atype term) = do
-    t <- check (Map.insert name atype env) term
-    return $ TArr atype t
-
-  find ::  Environment -> Name -> Either String Type
-  find env name = maybeToEither "Variable not found!" (Map.lookup name env)
+  check :: Environment -> Expr -> Either String Type
+  --
+  -- $ \Gamma \vdash n : \text{Int}  \quad  \text{(T-Int)} $
+  --
+  check _ (IntValue _) = Right TInt
+  --
+  -- $ \Gamma \vdash \text{True} : \text{Bool}  \quad  \text{(T-True)} $
+  --
+  check _ (BoolValue True) = Right TBool
+  --
+  -- $ \Gamma \vdash \text{False} : \text{Bool}  \quad   \text{(T-False)} $
+  --
+  check _ (BoolValue False) = Right TBool
+  --
+  -- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
+  --
+  check env (Var name) = find env name
 #+END_SRC
 
-** Tests
+** Type Checker - Lambda & Application
+#+BEGIN_SRC haskell :tangle src/TypedCheck.hs
+--
+-- $ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 }  \quad  \text{(T-Lam)} $
+--
+check env (Lambda name atype e) = do
+  t <- check (Map.insert name atype env) e
+  return $ TArr atype t
+--
+-- $  \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2}  \quad  \text{(T-App)} $
+--
+check env (App e1 e2) = do
+  (TArr ta1 ta2) <- check env e1
+  t2 <- check env e2
+  if ta1 == t2
+    then Right ta2
+    else Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)
+#+END_SRC
+

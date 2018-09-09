@@ -10,7 +10,7 @@ tangle: *.org
 	emacs --batch -l init.el --find-file $< --funcall org-beamer-export-to-latex --kill
 
 %.pdf: %.tex
-	xelatex -shell-escape $<
+	xelatex -shell-escape -8bit $<
 
 %.ps: %.dot
 	dot -O -Tps $<
@@ -26,4 +26,4 @@ default: test dot $(PDFS)
 
 .PHONY: clean
 clean:
-	rm *.tex *.pdf
+	rm -f *.tex *.pdf
