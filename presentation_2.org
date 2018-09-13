@@ -65,33 +65,53 @@ e ::= & & \text{Expressions:} \\
 & \ e \ e & \text{Application}
 \end{align*}
 
+- $\lambda x.e$ :: Function Definition
+- $e \ e$ :: Function Application
+
 ** Abstract Syntax Tree
-$(\lambda x . \lambda y . x \ y) \ a \ b$
+***  :B_columns:
+    :PROPERTIES:
+    :BEAMER_env: columns
+    :END:
+
+**** Lambda Expression                                                :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.2
+    :END:
+
+$(\lambda x . x) \ y$
+
+**** AST                                                              :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :END:
+
 #+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dot.ps :tangle dot/untyped_lambda_calculus_ast.dot
 digraph untyped_lambda_calculus_ast {
-  A [label = "Application"];
-  B [label = "Application"];
-  C [label = "Lambda"];
-  D [label = "Lambda"];
-  E [label = "Application"];
-  F [label = "Variable a"];
-  G [label = "Variable b"];
-  H [label = "Parameter x"];
-  I [label = "Parameter y"];
-  J [label = "Variable x"];
-  K [label = "Variable y"];
-  
-  A -> {B G}
-  B -> {C F}
-  C -> {H D}
-  D -> {I E}
-  E -> {J K}
+  App [label = "Application"];
+  Lam [label = "Lambda"]
+  Param [label = "Parameter: x"]
+  VarX [label = "Variable: x"]
+  VarY [label = "Variable: y"]
+
+  App -> {Lam VarY}
+  Lam -> {Param VarX}
+
 }
 #+END_SRC
 
-#+attr_latex: :height 5cm
+#+attr_latex: :height 3cm
 #+RESULTS:
 [[file:dot/untyped_lambda_calculus_ast.dot.ps]]
+
+*** Underneath :B_ignoreheading:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+
+*** Meaning:
+- Identity function $(\lambda x . x)$ is applied to a variable ($y$)
+
 
 ** Interpreter - Syntax
 #+BEGIN_SRC haskell :tangle src/UntypedSyntax.hs
@@ -99,12 +119,12 @@ digraph untyped_lambda_calculus_ast {
 
   type Name = String
 
-  data Expr
-    = Var Name
-    | App Expr
-          Expr
-    | Lambda Name
+  data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expressions:}$
+    = Var Name                 --       $x \ \ \ \ \ \ \ \ \text{Variable}$
+    | Lambda Name              --       $\lambda x.e \ \ \ \ \text{Abstraction}$
              Expr
+    | App Expr                 --       $e \ e \ \ \ \ \ \ \text{Application}$
+          Expr
     deriving (Eq, Show)
 #+END_SRC
 
@@ -129,15 +149,92 @@ digraph untyped_lambda_calculus_ast {
     Lambda "p" (Lambda "a" (Lambda "b" (App (App (Var "p") (Var "a")) (Var "b"))))
 #+END_SRC
 
-** Evaluation Rules - Call by Value
-Some rules...
+
+* Natural Deduction
+
+** Proof: 2 is a Natural Number
+***  :B_columns:
+    :PROPERTIES:
+    :BEAMER_env: columns
+    :END:
+
+**** Rules                                                            :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
 
 \begin{align*}
+\frac{}{0 : \mathtt{Nat}} & \quad & \text{(A1)} \\ \\
+\frac{n : \mathtt{Nat}}{\mathtt{succ}(n) : \mathtt{Nat}} & \quad & \text{(A2)} \\ \\
+\end{align*}
+
+**** Proof                                                            :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+
+\begin{equation*}
+\dfrac
+  {
+    \quad
+    \dfrac
+    {
+      \quad
+      \dfrac{}
+      {
+        0 : Nat
+      }
+      \quad \text{(A1)}
+    }
+    {
+      succ(0) : Nat
+    }
+    \quad \text{(A2)}
+  }
+  {
+    succ(succ(0)) : Nat
+  }
+  \quad \text{(A2)}
+\end{equation*}
+
+*** Underneath :B_ignoreheading:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+
+*** Meaning:
+- A1 :: $0$ is a natural number (by definition)
+- A2 :: The successor of a natural number is a natural number
+- $\to$ :: Thus the sucessor of the successor of $0$ ($2$) must be a natural number
+
+** Evaluation Rules - Call by Value - E-App1
+\begin{align*}
  \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \quad & \text{E-App1} \\ \\
+\end{align*}
+
+*** Meaning:
+- Under the condition that $e_1$ can be reduced further, do it.
+
+** Evaluation Rules - Call by Value - E-App2
+\begin{align*}
  \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
+\end{align*}
+
+*** Meaning:
+- Under the condition that $e_2$ can be reduced further and $v_1$ is a value, do it.
+- Pure Untyped Lambda Calculus: 
+  - Only Lambdas (functions) are values.
+  - But you can add Ints, Booleans, etc. (and loose purity)
+
+** Evaluation Rules - Call by Value - E-AppLam
+\begin{align*}
  {(\lambda x . e) v \to [x / v] e } & \quad & \text{E-AppLam} \\ \\
 \end{align*}
 
+*** Meaning:
+- If a lambda (function) is applied to a value, substitute that value for it's parameter.
+- "substitute" : replace it for every occurence in the lambda's body
 
 ** Interpreter - Evaluation
 #+BEGIN_SRC haskell :tangle src/NaiveUntypedEval.hs
