@@ -24,8 +24,7 @@
 - Function *Application* ($e \ e$)
 - Parameters / *Variables* ($x$)
 #+BEAMER: \pause
-*** Then we get:
-**** PL constructs :B_column:
+**** Then we get:                                    :B_column:
      :PROPERTIES:
      :BEAMER_col: 0.35
      :BEAMER_env: block
@@ -41,10 +40,8 @@
      :PROPERTIES:
      :BEAMER_col: 0.55
      :BEAMER_env: block
-     :BEAMER_envargs: C[t]
      :END:
-- *Turing Completeness* 
-  - If it can be computed, it can be computed in Lambda Calculus!
+- If it can be computed, it can be computed in Lambda Calculus!
 
 ** Build an Interpreter
 *** Let's build an interpreter
@@ -152,6 +149,45 @@ digraph untyped_lambda_calculus_ast {
 
 * Natural Deduction
 
+** Notation
+
+\begin{align*}
+\frac{}{Axiom} & \quad & \text{(A1)} \\ \\
+\frac{Antecedent}{Conclusion} & \quad & \text{(A2)} \\ \\
+\end{align*}
+
+*** Meaning:
+- Axiom :: Rule without Precondition
+- Antecedent :: Precondition - if it's fulfilled this rule applies.
+- Conclusion :: What follows from this rule.
+- A1, A2 :: Names for the rules
+
+** Proof: 2 is a Natural Number
+***  :B_columns:
+    :PROPERTIES:
+    :BEAMER_env: columns
+    :END:
+
+**** Rules                                                            :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :END:
+
+\begin{align*}
+\frac{}{0 : \mathtt{Nat}} & \quad & \text{(A1)} \\ \\
+\frac{n : \mathtt{Nat}}{\mathtt{succ}(n) : \mathtt{Nat}} & \quad & \text{(A2)} \\ \\
+\end{align*}
+
+
+*** Underneath :B_ignoreheading:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+
+*** Meaning:
+- A1 :: $0$ is a natural number (by definition)
+- A2 :: The successor of a natural number is a natural number
+
 ** Proof: 2 is a Natural Number
 ***  :B_columns:
     :PROPERTIES:
@@ -208,6 +244,7 @@ digraph untyped_lambda_calculus_ast {
 - A2 :: The successor of a natural number is a natural number
 - $\to$ :: Thus the sucessor of the successor of $0$ ($2$) must be a natural number
 
+* Evaluation Rules
 ** Evaluation Rules - Call by Value - E-App1
 \begin{align*}
  \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \quad & \text{E-App1} \\ \\
@@ -223,9 +260,9 @@ digraph untyped_lambda_calculus_ast {
 
 *** Meaning:
 - Under the condition that $e_2$ can be reduced further and $v_1$ is a value, do it.
-- Pure Untyped Lambda Calculus: 
+- "Bare" Untyped Lambda Calculus:
   - Only Lambdas (functions) are values.
-  - But you can add Ints, Booleans, etc. (and loose purity)
+  - But you can add Ints, Booleans, etc. ("Enriched Untyped Lambda Calculus")
 
 ** Evaluation Rules - Call by Value - E-AppLam
 \begin{align*}
@@ -275,6 +312,8 @@ digraph untyped_lambda_calculus_ast {
       else Lambda varName (substitute name substitution term)
 #+END_SRC
 
+** Tests
+
 ** Interpreter with Environment
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   module UntypedEval where
@@ -299,33 +338,90 @@ digraph untyped_lambda_calculus_ast {
 
 ** Tests
 * Simply Typed Lambda Calculus
+
 ** Structure
 \begin{align*}
 e ::= & & \text{Expressions:} \\
 & \ x & \text{Variable} \\
-& \ \lambda x:\tau.e & \text{Abstraction} \\
+& \ \lambda x \alert{:\tau}.e & \text{Abstraction} \\
 & \ e \ e & \text{Application}
 \end{align*}
-** Progress and Preservation
+
+- $\tau$ :: Type of the parameter $x$
+  - `Bool`, `Int`, ...
+
+** What's a Type?
+
+A Type is a set of values that an expression may return:
+- Bool :: True, False
+- Int :: $[-2^{29} .. 2^{29}-1]$ (in Haskell, `Data.Int`)
+
+Simple types don't have parameters, no polymorphism:
+- =Bool=, =Int= :: no parameters $\to$ simple types
+- =Maybe a= :: $a$ is a type parameter $\to$ not a simple type
+- =id :: a -> a= :: $a$ is a type parameter $\to$ not a simple type
+
+** Type Safety = Progress + Preservation
 *** **Progress** :  If an expression is well typed then either it is a value, or it can be further evaluated by an available evaluation rule.
 *** **Preservation** : If an expression $e$ has type $\tau$, and is evaluated to $e'$, then $e'$ has type $\tau$.
+    - $e \equiv (\lambda x: Int.x) 1$ and $e' \equiv 1$ have both the same type: `Int`
 
 ** Evaluation
-*** Dynamic rules stay the same!
+*** Evalution rules stay the same!
     - Type checking is done upfront
 
-** Interpreter
-
-
-** Typing Rules
+** Typing Rules - Variables
 \begin{align*}
  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
- \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 } & \quad & \text{T-Lam} \\ \\
- \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2} & \quad & \text{T-App} \\ \\
+\end{align*}  
+
+*** Meaning
+- \Gamma :: The Typing Environment, a list of $(Variable : Type)$ pairs (associations)
+- $x:\sigma \in \Gamma$ :: If $(x, \sigma)$ is in the Typing Environment
+- $\Gamma \vdash x:\sigma$ :: $x$ has type $\sigma$
+
+** Typing Rules - Constants
+\vspace{-0.5cm}
+\begin{align*}
  \Gamma \vdash n : \text{Int} & \quad & \text{T-Int} \\ \\
  \Gamma \vdash \text{True} : \text{Bool} & \quad & \text{T-True} \\ \\
  \Gamma \vdash \text{False} : \text{Bool} & \quad  & \text{T-False} \\ \\
 \end{align*}  
+
+\vspace{-1.5cm}
+*** Meaning
+- =True=, =False= :: literals / constants are of type =Bool=
+- $n$ :: number literals / constants are of =Int=
+*** Why do we need $\Gamma$ here?
+- We handle Type Constructors like variables
+- Think: $\Gamma \equiv \emptyset , True : Bool, False : Bool, 0 : Int, 1 : Int, \dots$
+
+** Typing Rules - Lambdas
+\begin{align*}
+ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 } & \quad & \text{T-Lam} \\ \\
+\end{align*}  
+
+*** Meaning
+- Condition :: With $x : \tau_1$ in the Typing Environment, $e$ has type \tau_2
+- Conclusion :: $\lambda x:\tau_1 . e$ has type $\tau_1 \rightarrow \tau_2$
+- Because $e$ has type \tau_2 if $x$ has type \tau_1
+
+** Typing Rules - Applications
+\begin{align*}
+ \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2} & \quad & \text{T-App} \\ \\
+\end{align*}  
+
+*** Meaning
+- Condition :: If $e_1$ is a function of type $\tau_1 \rightarrow \tau_2$ and $e_2$ has type $\tau_2$
+- Conclusion :: Then the type of $e_1 e_2$ (function application) is $tau_2$
+#+BEAMER: \pause
+#+BEGIN_SRC haskell
+id' :: Int -> Int
+id' i = i
+
+1 :: Int
+(id' 1) :: Int
+#+END_SRC
 
 ** Type Checker
 #+BEGIN_SRC haskell :tangle src/TypedSyntax.hs
