@@ -31,7 +31,8 @@ library:
       - NaiveUntypedEval
       - UntypedSyntax
       - TypedSyntax
-      
+      - UntypedSyntaxExamples
+
 tests:
   lambda-calculus-presentation-test:
     main:                Spec.hs

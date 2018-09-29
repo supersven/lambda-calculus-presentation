@@ -6,10 +6,7 @@ import qualified Data.Map.Strict as Map
 
 import TypedSyntax
 
-find :: Environment -> Name -> Either String Type
-find env name = maybeToEither "Var not found!" (Map.lookup name env)
-
-check :: Environment -> Expr -> Either String Type
+check :: Environment -> Expr -> Either Name Type
 --
 -- $ \Gamma \vdash n : \text{Int}  \quad  \text{(T-Int)} $
 --
@@ -22,10 +19,6 @@ check _ (BoolValue True) = Right TBool
 -- $ \Gamma \vdash \text{False} : \text{Bool}  \quad   \text{(T-False)} $
 --
 check _ (BoolValue False) = Right TBool
---
--- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
---
-check env (Var name) = find env name
 
 --
 -- $ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 }  \quad  \text{(T-Lam)} $
@@ -42,3 +35,11 @@ check env (App e1 e2) = do
   if ta1 == t2
     then Right ta2
     else Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)
+
+--
+-- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
+--
+check env (Var name) = find env name
+
+find :: Environment -> Name -> Either Name Type
+find env name = maybeToEither "Var not found!" (Map.lookup name env)
