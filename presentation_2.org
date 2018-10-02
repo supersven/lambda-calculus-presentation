@@ -43,6 +43,19 @@
      :END:
 - If it can be computed, it can be computed in Lambda Calculus!
 
+** Example - $(\lambda p . \lambda q . p) \ a \ b$
+\begin{align*}
+\onslide<1->{ & ( \lambda \color<3->{orange}{p} . & \lambda q . & \color<3->{orange}{p} & ) & & \color<3->{orange}{a} & & b & & \onslide<2->{ \text{Substitute $p \mapsto a $}} } \\
+\onslide<4->{ & (  & \lambda \color<6->{blue}{q} . & \color<4->{orange}{a} & ) &&  & & \color<6->{blue}{b} & & \onslide<5->{ \text{Substitute $q \mapsto b $}} } \\
+\onslide<7->{ & (  &  & \color<4->{orange}{a} & ) &&  & &  & & }
+\end{align*}
+
+*** Meaning
+- $\lambda p . \lambda q . p$ :: Is a function that returns a function ($\lambda q . p$)
+- $a , b$ :: Some variables (defined somewhere else)
+- $p$ :: Is a variable that is bound to the parameter with the same name
+
+
 ** Build an Interpreter
 *** Let's build an interpreter
 - Deepen our intiution
@@ -51,8 +64,8 @@
   - How does a type checker work?
   - How does it restrict the programs we might write?
 
-- On our way we'll learn some math mumbo-jumbo: /Natural Deduction/
-  - Found in many papers about Type Systems and Programming Language Evaluation
+- We'll do /Math Driven Development/
+  - Look at the concepts in math first, then translate them to Haskell
 
 ** Structure
 \begin{align*}
@@ -110,8 +123,8 @@ digraph untyped_lambda_calculus_ast {
 - Identity function $(\lambda x . x)$ is applied to a variable ($y$)
 
 
-** Interprethttps://downloads.haskell.org/~ghc/7.2.2/docs/html/users_guide/ghci-dot-files.htmlghcier - Syntax
-#+Bghci no prefixEGIN_SRC haskell :tangle src/UntypedSyntax.hs
+** Interpreter - Syntax
+#+BEGIN_SRC haskell :tangle src/UntypedSyntax.hs
   module UntypedSyntax where
 
   type Name = String
