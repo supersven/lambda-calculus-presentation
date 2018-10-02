@@ -129,7 +129,7 @@ digraph untyped_lambda_calculus_ast {
 
   type Name = String
 
-  data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expressions:}$
+  data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expression:}$
     = Var Name                 --       $x \ \ \ \ \ \ \ \ \text{Variable}$
     | Lambda Name              --       $\lambda x.e \ \ \ \ \text{Abstraction}$
              Expr
@@ -325,11 +325,26 @@ digraph untyped_lambda_calculus_ast {
 ** Interpreter - Substitution
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   substitute :: Name -> Expr -> Expr -> Expr
+  --
+  -- If the Name matches: Substitute this var for it's substitution
+  -- Otherwise: Leave it as is
+  --
   substitute name substitution var@(Var varName)
     | name  == varName = substitution
     | otherwise = var
+  --
+  -- Recursively substitute in both parts of applications
+  --
   substitute name substitution (App term1 term2) =
     App (substitute name substitution term1) (substitute name substitution term2)
+#+END_SRC
+
+** Interpreter - Substitution
+#+BEGIN_SRC haskell :tangle src/UntypedEval.hs
+  --
+  -- Only substitute in lambda's bodies, if the parameter doesn't
+  -- redefine the Name in it's scope
+  --
   substitute name substitution (Lambda varName term) =
     if name == varName
       then Lambda varName term

@@ -3,7 +3,7 @@ module UntypedSyntax where
 
 type Name = String
 
-data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expressions:}$
+data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expression:}$
   = Var Name                 --       $x \ \ \ \ \ \ \ \ \text{Variable}$
   | Lambda Name              --       $\lambda x.e \ \ \ \ \text{Abstraction}$
            Expr
