@@ -96,7 +96,8 @@ $(\lambda x . x) \ y$
     :BEAMER_col: 0.6
     :END:
 
-#+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dot.ps :tangle dot/untyped_lambda_calculus_ast.dot
+#+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dotnix
+.ps :tangle dot/untyped_lambda_calculus_ast.dot
 digraph untyped_lambda_calculus_ast {
   App [label = "Application"];
   Lam [label = "Lambda"]
@@ -129,11 +130,11 @@ digraph untyped_lambda_calculus_ast {
 
   type Name = String
 
-  data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expression:}$
-    = Var Name                 --       $x \ \ \ \ \ \ \ \ \text{Variable}$
-    | Lambda Name              --       $\lambda x.e \ \ \ \ \text{Abstraction}$
+  data Expr                    -- $e ::= \ \ \ \ \ \ \ \ \ \ \ \text{Expressions:}$
+    = Var Name                 --       $x \ \ \  \ \ \ \ \ \ \ \ \text{Variable}$
+    | Lambda Name              --       $\lambda x.e \ \ \  \ \ \ \ \text{Abstraction}$
              Expr
-    | App Expr                 --       $e \ e \ \ \ \ \ \ \text{Application}$
+    | App Expr                 --       $e \ e \ \ \  \ \ \ \ \ \ \text{Application}$
           Expr
     deriving (Eq, Show)
 #+END_SRC
@@ -221,7 +222,6 @@ digraph untyped_lambda_calculus_ast {
     :PROPERTIES:
     :BEAMER_col: 0.5
     :END:
-
 
 \begin{equation*}
 \dfrac
@@ -326,14 +326,14 @@ digraph untyped_lambda_calculus_ast {
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   substitute :: Name -> Expr -> Expr -> Expr
   --
-  -- If the Name matches: Substitute this var for it's substitution
+  -- If the Name matches: Substitute this Var by it's substitution
   -- Otherwise: Leave it as is
   --
   substitute name substitution var@(Var varName)
     | name  == varName = substitution
     | otherwise = var
   --
-  -- Recursively substitute in both parts of applications
+  -- Recursively substitute in both parts of Applications
   --
   substitute name substitution (App term1 term2) =
     App (substitute name substitution term1) (substitute name substitution term2)
@@ -342,7 +342,7 @@ digraph untyped_lambda_calculus_ast {
 ** Interpreter - Substitution
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
   --
-  -- Only substitute in lambda's bodies, if the parameter doesn't
+  -- Only substitute in Lambda's body, if the parameter doesn't
   -- redefine the Name in it's scope
   --
   substitute name substitution (Lambda varName term) =
@@ -352,42 +352,49 @@ digraph untyped_lambda_calculus_ast {
 #+END_SRC
 
 ** Tests
+#+BEGIN_SRC haskell :tangle test/UntypedEvalExamplesSpec.hs
+  module UntypedEvalExamplesSpec where
 
-#+BEGIN_SRC haskell :exports both :session test_eval
-:load UntypedEval
+  import NaiveUntypedEval
+  import Prelude hiding (and)
+  import Test.Hspec
+  import UntypedSyntax
+  import UntypedSyntaxExamples
 
-eval $ Var "a"
+  main :: IO ()
+  main = hspec spec
+
+  spec :: Spec
+  spec =
+    describe "eval" $
+      it "should evaluate these terms"  $ do
+  --
+  -- $a \to a $
+  --
+        eval (Var "a") `shouldBe` Var "a"
 #+END_SRC
-
-#+RESULTS:
-: *UntypedEval> Var "a"
-
-#+BEGIN_SRC haskell :exports both :session test_eval
--- $true \equiv \lambda p . \lambda q . p$
-true :: Expr
-true = Lambda "p" (Lambda "q" (Var "p"))
-
-eval $ App (App true (Var "a")) (Var "b")
-#+END_SRC
-
-#+RESULTS:
-: *UntypedEval> *UntypedEval> Var "a"
 
 ** Tests
-#+BEGIN_SRC haskell :exports both :session test_eval
--- $false \equiv \lambda p . \lambda q . q$
-false :: Expr
-false = Lambda "p" (Lambda "q" (Var "q"))
-
--- $and \equiv \lambda p . \lambda q . p \ q \ p$
-and :: Expr
-and = Lambda "p" $ Lambda "q" $ App (App (Var "p") (Var "q")) (Var "p")
-
-eval $ App (App and true) false
+#+BEGIN_SRC haskell :tangle test/UntypedEvalExamplesSpec.hs
+  --
+  -- $true \equiv \lambda p . \lambda q . p$ 
+  --
+  -- $true \ a \ b \to a$
+  --
+        eval (App (App true (Var "a")) (Var "b")) `shouldBe` Var "a"
 #+END_SRC
 
-#+RESULTS:
-: *UntypedEval> *UntypedEval> Lambda "p" (Lambda "q" (Var "q"))
+#+BEGIN_SRC haskell :tangle test/UntypedEvalExamplesSpec.hs
+  --
+  -- $false \equiv \lambda p . \lambda q . q$
+  --
+  -- $and \equiv \lambda p . \lambda q . p \ q \ p$
+  --
+  -- $and \ true \ false \to false$"
+  --
+        eval (App (App and true) false) `shouldBe`
+          Lambda "p" (Lambda "q" (Var "q"))
+#+END_SRC
 
 * Simply Typed Lambda Calculus
 
