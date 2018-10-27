@@ -419,9 +419,9 @@ A Type is a set of values that an expression may return:
 - Int :: $[-2^{29} .. 2^{29}-1]$ (in Haskell, `Data.Int`)
 
 Simple types don't have parameters, no polymorphism:
-- =Bool=, =Int= :: no parameters $\to$ simple types
-- =Maybe a= :: $a$ is a type parameter $\to$ not a simple type
-- =id :: a -> a= :: $a$ is a type parameter $\to$ not a simple type
+- =Bool=, =Int= :: have no parameters $\to$ simple types
+- =Maybe a= :: takes a type parameter ($a$) $\to$ not a simple type
+- =a -> a= :: is polymorphic $\to$ not a simple type
 
 ** Type Safety = Progress + Preservation
 *** **Progress** :  If an expression is well typed then either it is a value, or it can be further evaluated by an available evaluation rule.
@@ -605,7 +605,7 @@ check env (Lambda name atype e) = do
         check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) `shouldBe`
           Right TInt
   --
-  -- $42 False$ TODO Symbol for "does not type check"
+  -- Does not type check: $42 False$
   --
         check Map.empty (App (IntValue 42) (BoolValue False)) `shouldBe` Left "Expected TArr but got : TInt"
 
