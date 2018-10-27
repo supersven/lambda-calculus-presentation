@@ -97,7 +97,9 @@ $(\lambda x . x) \ y$
     :END:
 
 #+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dotnix
-.ps :tangle dot/
+.ps :taHey @pheymann ,
+Thanks a lot for checking that the proposal is "sound". :+1: 
+I really appreciate that!ngle dot/
 untyped_lambda_calculus_ast.dot
 digraph untyped_lambda_calculus_ast {
   App [label = "Application"];
@@ -580,3 +582,95 @@ check env (Lambda name atype e) = do
 #+END_SRC
 
 ** Tests
+#+BEGIN_SRC haskell :tangle test/TypedCheckExamplesSpec.hs
+  module TypedCheckExamplesSpec where
+
+  import Test.Hspec
+  import TypedCheck
+  import TypedSyntax
+
+  import qualified Data.Map.Strict as Map
+
+  main :: IO ()
+  main = hspec spec
+
+  spec :: Spec
+  spec = do
+    describe "check" $
+      it "should type check these terms" $
+  --
+  -- $(\lambda x:Int . x) 42 :: Int $
+  --
+       do
+        check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) `shouldBe`
+          Right TInt
+  --
+  -- $42 False$ TODO Symbol for "does not type check"
+  --
+        check Map.empty (App (IntValue 42) (BoolValue False)) `shouldBe` Left "Expected TArr but got : TInt"
+
+#+END_SRC
+
+* End
+** Thanks
+- Hope you enjoyed this talk and learned something new.
+- Hope it wasn't too much math and dusty formulas ... :)
+
+
+* Books						 :B_appendix:
+  :PROPERTIES:
+  :BEAMER_env: appendix
+  :END:
+** Good Math
+
+*** Image :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./good_math.jpg]]
+
+*** Description                                                    :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+/A Geek's Guide to the Beauty of Numbers, Logic, and Computation/
+- Easy to understand
+
+** Types and Programming Languages
+
+*** Image                                                          :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./types-and-programming-languages.jpg]]
+
+*** Description                                                       :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+- Types systems explained by building interpreters / checkers and proving properties
+- Very "mathematical", but very complete and self-contained
+
+
+
+** Write you a Haskell
+*** Image                                                          :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: column
+    :END:
+[[./write-you-a-haskell.png]]
+
+*** Description                                                       :B_column:
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :BEAMER_env: column
+    :END:
+/Building a modern functional compiler from first principles./
+- Starts with the Lambda Calculus and goes all the way down to a full Haskell compiler
+- Available for free - Not finished, yet
+

@@ -1,3 +1,4 @@
+
 module TypedCheckSpec where
 
 import Test.Hspec
