@@ -140,8 +140,6 @@ digraph untyped_lambda_calculus_ast {
 
 ** Interpreter - Syntax - Examples
 
-** Interpreter - Syntax - Examples
-
 #+BEGIN_SRC haskell :tangle src/UntypedSyntaxExamples.hs
   module UntypedSyntaxExamples where
 
@@ -418,7 +416,7 @@ e ::= & & \text{Expressions:} \\
 \end{align*}
 
 - $\tau$ :: Type of the parameter $x$
-  - `Bool`, `Int`, ...
+  - =Bool=, =Int=, ...
 
 ** What's a Type?
 
@@ -433,8 +431,20 @@ Simple types don't have parameters, no polymorphism:
 
 ** Type Safety = Progress + Preservation
 *** **Progress** :  If an expression is well typed then either it is a value, or it can be further evaluated by an available evaluation rule.
+    - A well typed (typable) program never gets "stuck".
+#+BEAMER: \pause
 *** **Preservation** : If an expression $e$ has type $\tau$, and is evaluated to $e'$, then $e'$ has type $\tau$.
-    - $e \equiv (\lambda x: Int.x) 1$ and $e' \equiv 1$ have both the same type: `Int`
+    - $e \equiv (\lambda x: Int.x) 1$ and $e' \equiv 1$ have both the same type: =Int=
+
+** Not all meaningful Programs can be type checked
+#+BEGIN_SRC haskell
+id :: a -> a
+id a = a
+#+END_SRC
+
+- It strongly depends on the type system if this is allowed or not.
+- In Simply Typed Lambda Calculus it's not!
+  - No polymorphic types ...
 
 ** Evaluation
 *** Evalution rules stay the same!
@@ -601,22 +611,37 @@ check env (Lambda name atype e) = do
 
   main :: IO ()
   main = hspec spec
+#+END_SRC
 
+** Tests
+#+BEGIN_SRC haskell :tangle test/TypedCheckExamplesSpec.hs
   spec :: Spec
   spec = do
     describe "check" $
       it "should type check these terms" $
   --
-  -- $(\lambda x:Int . x) 42 :: Int $
+  -- $(\lambda x:Int . x) \ 42 :: Int $
   --
        do
-        check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) `shouldBe`
-          Right TInt
-  --
-  -- Does not type check: $42 False$
-  --
-        check Map.empty (App (IntValue 42) (BoolValue False)) `shouldBe` Left "Expected TArr but got : TInt"
+        check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) 
+          `shouldBe` Right TInt
+#+END_SRC
 
+#+BEGIN_SRC haskell :tangle test/TypedCheckExamplesSpec.hs
+  --
+  -- Does not type check: $(\lambda x:Bool . x) \ 42$
+  --
+        check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) 
+          `shouldBe` Right TInt
+#+END_SRC
+
+** Tests
+#+BEGIN_SRC haskell :tangle test/TypedCheckExamplesSpec.hs
+  --
+  -- Does not type check: $42 \ False$
+  --
+        check Map.empty (App (IntValue 42) (BoolValue False)) `shouldBe`
+          Left "Expected TArr but got : TInt"
 #+END_SRC
 
 * End

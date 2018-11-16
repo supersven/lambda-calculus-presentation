@@ -31,7 +31,7 @@ spec =
 --
 -- $and \equiv \lambda p . \lambda q . p \ q \ p$
 --
--- $and \ true \ false \to false$"
+-- $and \ true \ false \to false$
 --
       eval (App (App and true) false) `shouldBe`
         Lambda "p" (Lambda "q" (Var "q"))
