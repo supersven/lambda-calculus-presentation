@@ -76,7 +76,7 @@ e ::= & & \text{Expressions:} \\
 \end{align*}
 
 - $\lambda x.e$ :: Function Definition
-- $e \ e$ :: Function Application
+- $e \ e$ :: Function Application (Function Call)
 
 ** Abstract Syntax Tree
 ***  :B_columns:
@@ -96,11 +96,7 @@ $(\lambda x . x) \ y$
     :BEAMER_col: 0.6
     :END:
 
-#+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.dotnix
-.ps :taHey @pheymann ,
-Thanks a lot for checking that the proposal is "sound". :+1: 
-I really appreciate that!ngle dot/
-untyped_lambda_calculus_ast.dot
+#+BEGIN_SRC dot :file dot/untyped_lambda_calculus_ast.ps :tangle dot/untyped_lambda_calculus_ast.dot
 digraph untyped_lambda_calculus_ast {
   App [label = "Application"];
   Lam [label = "Lambda"]
@@ -144,11 +140,21 @@ digraph untyped_lambda_calculus_ast {
 
 ** Interpreter - Syntax - Examples
 
+** Interpreter - Syntax - Examples
+
 #+BEGIN_SRC haskell :tangle src/UntypedSyntaxExamples.hs
   module UntypedSyntaxExamples where
 
   import UntypedSyntax
 
+  -- $id \equiv \lambda x . x$
+  id :: Expr
+  id = Lambda "x" $ Var "x"
+#+END_SRC
+
+#+BEAMER: \pause
+
+#+BEGIN_SRC haskell :tangle src/UntypedSyntaxExamples.hs
   -- $true \equiv \lambda p . \lambda q . p$
   true :: Expr
   true = Lambda "p" (Lambda "q" (Var "p"))
@@ -156,11 +162,13 @@ digraph untyped_lambda_calculus_ast {
   -- $false \equiv \lambda p . \lambda q . q$
   false :: Expr
   false = Lambda "p" (Lambda "q" (Var "q"))
+#+END_SRC
 
+** Interpreter - Syntax - Examples
+#+BEGIN_SRC haskell :tangle src/UntypedSyntaxExamples.hs
   -- $and \equiv \lambda p . \lambda q . p \ q \ p$
   and :: Expr
   and = Lambda "p" $ Lambda "q" $ App (App (Var "p") (Var "q")) (Var "p")
-
 #+END_SRC
 
 
@@ -258,7 +266,7 @@ digraph untyped_lambda_calculus_ast {
 *** Meaning:
 - A1 :: $0$ is a natural number (by definition)
 - A2 :: The successor of a natural number is a natural number
-- $\to$ :: Thus the sucessor of the successor of $0$ ($2$) must be a natural number
+- $\to$ :: Thus the successor of the successor of $0$ ($2$) must be a natural number
 
 * Evaluation Rules
 ** Evaluation Rules - Call by Value - E-App1
@@ -393,7 +401,7 @@ digraph untyped_lambda_calculus_ast {
   --
   -- $and \equiv \lambda p . \lambda q . p \ q \ p$
   --
-  -- $and \ true \ false \to false$"
+  -- $and \ true \ false \to false$
   --
         eval (App (App and true) false) `shouldBe`
           Lambda "p" (Lambda "q" (Var "q"))

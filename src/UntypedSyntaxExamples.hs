@@ -3,6 +3,10 @@ module UntypedSyntaxExamples where
 
 import UntypedSyntax
 
+-- $id \equiv \lambda x . x$
+id :: Expr
+id = Lambda "x" $ Var "x"
+
 -- $true \equiv \lambda p . \lambda q . p$
 true :: Expr
 true = Lambda "p" (Lambda "q" (Var "p"))
