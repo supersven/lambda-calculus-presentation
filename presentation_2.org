@@ -10,7 +10,7 @@
 #+startup: beamer
 #+LaTeX_CLASS: beamer
 #+LaTeX_HEADER: \usemintedstyle{tango}
-#+LaTeX_HEADER: \usepackage{fontspec}
+#+LaTeX_HEADER: \usepackage{fontspec, xcolor, calc}
 # #+LaTeX_HEADER: \setmonofont[Contextuals={Alternate}]{Fira Code}
 #+LaTeX_HEADER: \newminted{haskell}{mathescape=true}
 #+LaTeX_HEADER: \setminted[haskell]{mathescape=true}
@@ -275,6 +275,18 @@ digraph untyped_lambda_calculus_ast {
 *** Meaning:
 - Under the condition that $e_1$ can be reduced further, do it.
 
+** Evaluation Rules - E-App1 - Example
+
+\begin{equation*}
+ \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2}
+\end{equation*}
+
+*** Example
+\begin{align*}
+& \overbrace{\alert<2->{((\lambda x.x) \ (\lambda y.y))}}^{e_1} \ e_2 \\
+\onslide<3->{\to & \alert<3->{(\lambda y.y)} \ z}
+\end{align*}
+
 ** Evaluation Rules - Call by Value - E-App2
 \begin{align*}
  \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
@@ -286,6 +298,18 @@ digraph untyped_lambda_calculus_ast {
   - Only Lambdas (functions) are values.
   - But you can add Ints, Booleans, etc. ("Enriched Untyped Lambda Calculus")
 
+** Evaluation Rules - E-App2 - Example
+\begin{align*}
+ \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
+\end{align*}
+
+*** Example
+\begin{align*}
+& \overbrace{(\lambda x.x)}^{v_1} \ \overbrace{\alert<2->{((\lambda y.y) \ 42)}}^{e_2} \\
+\onslide<3->{\to & (\lambda x.x) \ \alert<3->{42}}
+\end{align*}
+
+
 ** Evaluation Rules - Call by Value - E-AppLam
 \begin{align*}
  {(\lambda x . e) v \to [x / v] e } & \quad & \text{E-AppLam} \\ \\
@@ -294,6 +318,18 @@ digraph untyped_lambda_calculus_ast {
 *** Meaning:
 - If a lambda (function) is applied to a value, substitute that value for it's parameter.
 - "substitute" : replace it for every occurence in the lambda's body
+
+
+** Evaluation Rules - E-AppLam -Example
+\begin{align*}
+ {(\lambda x . e) v \to [x / v] e } & \quad & \text{E-AppLam} \\ \\
+\end{align*}
+
+*** Example
+\begin{align*}
+& (\alert<2->{\lambda x.} \lambda y.\alert<2->{x}) \ \alert<2->{z} \\
+\onslide<3->{\to & \lambda y .\alert<3->{z}}
+\end{align*}
 
 ** Interpreter - Evaluation
 #+BEGIN_SRC haskell :tangle src/UntypedEval.hs
@@ -459,6 +495,18 @@ id a = a
 - \Gamma :: The Typing Environment, a list of $(Variable : Type)$ pairs (associations)
 - $x:\sigma \in \Gamma$ :: If $(x, \sigma)$ is in the Typing Environment
 - $\Gamma \vdash x:\sigma$ :: $x$ has type $\sigma$
+** Typing Rules - Variables - Example
+\begin{align*}
+ \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
+\end{align*}  
+
+*** Example
+\begin{align*}
+\underbrace{\lambda x:Int}_{\Gamma' = \Gamma , x:Int}. \underbrace{\lambda y:Bool}_{\Gamma'' = \Gamma', y:Bool}.\underbrace{x}_{\Gamma'' \vdash x:Int}
+\end{align*}
+
+- $\lambda x:Int$ :: Add $x:Int$ to the Typing Environment ($\Gamma$)
+- $x$ :: We know from the Typing Environment ($\Gamma''$) that $x$ has type $Int$
 
 ** Typing Rules - Constants
 \vspace{-0.5cm}
@@ -476,6 +524,20 @@ id a = a
 - We handle Type Constructors like variables
 - Think: $\Gamma \equiv \emptyset , True : Bool, False : Bool, 0 : Int, 1 : Int, \dots$
 
+** Typing Rules - Constants - Example
+\begin{align*}
+ \Gamma \vdash n : \text{Int} & \quad & \text{T-Int} \\ \\
+ \Gamma \vdash \text{True} : \text{Bool} & \quad & \text{T-True}
+\end{align*}  
+
+*** Example
+
+\begin{align*} 
+& \Gamma \equiv \emptyset , \textcolor<2->{mLightGreen}{True : Bool}, False : Bool, 0 : Int, \textcolor<3->{mLightBrown}{1 : Int}, \dots \\ \\
+& \textcolor<2->{mLightGreen}{True} \\
+& \textcolor<3->{mLightBrown}{1}
+\end{align*}
+
 ** Typing Rules - Lambdas
 \begin{align*}
  \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 } & \quad & \text{T-Lam} \\ \\
@@ -485,6 +547,20 @@ id a = a
 - Condition :: With $x : \tau_1$ in the Typing Environment, $e$ has type \tau_2
 - Conclusion :: $\lambda x:\tau_1 . e$ has type $\tau_1 \rightarrow \tau_2$
 - Because $e$ has type \tau_2 if $x$ has type \tau_1
+
+
+** Typing Rules - Lambdas - Example
+\begin{align*}
+ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 } & \quad & \text{T-Lam} \\ \\
+\end{align*}  
+
+*** Example
+
+\begin{align*}
+& \lambda x: \overbrace{Int}^{\tau_1} . \overbrace{x}^{e} & : & \onslide<1-2>{?} \onslide<3->{\overbrace{Int}^{\tau_1} \rightarrow \overbrace{Int}^{\tau_2} } \\ \\
+\onslide<2->{&  \frac{\Gamma, x : Int \vdash e : Int}{\Gamma \vdash \lambda x: Int . e : Int \rightarrow Int }}
+\end{align*}
+
 
 ** Typing Rules - Applications
 \begin{align*}
@@ -502,6 +578,19 @@ id' i = i
 1 :: Int
 (id' 1) :: Int
 #+END_SRC
+
+
+** Typing Rules - Applications - Example
+\begin{align*}
+ \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2} & \quad & \text{T-App} \\ \\
+\end{align*}  
+
+*** Example
+\begin{align*}
+& \overbrace{(\lambda x:Int. True)}^{e_1} \overbrace{42}^{e_2} & : & \onslide<1>{?} \onslide<3->{\overbrace{Bool}^{\tau_2}} \\ \\
+\onslide<2->{ & \frac{\Gamma \vdash \overbrace{(\lambda x:Int. True)}^{e_1} : \overbrace{Int \rightarrow Bool}^{\tau_1 \rightarrow \tau_2} \quad \Gamma \vdash \overbrace{42}^{e_2} : \overbrace{Int}^{\tau_1}}{\Gamma \vdash \underbrace{(\lambda x:Int. True)}_{e_1} \underbrace{42}_{e_2} : \underbrace{Bool}_{\tau_2}}}
+\end{align*}  
+
 
 ** Type Checker - Expressions
 #+BEGIN_SRC haskell :tangle src/TypedSyntax.hs
