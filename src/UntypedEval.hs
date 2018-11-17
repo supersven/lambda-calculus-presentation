@@ -24,7 +24,7 @@ eval (App e1 e2)
 --
 -- $ {(\lambda x . e) v \to [x / v] e } \quad (E-AppLam) $
 --
-            (Lambda name e1'_body) -> eval $ substitute name e2' e1'_body
+            (Lambda x e1'_body) -> eval $ substitute x e2' e1'_body
             e1' -> App e1' e2'
 
 substitute :: Name -> Expr -> Expr -> Expr

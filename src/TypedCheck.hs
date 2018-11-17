@@ -23,27 +23,27 @@ check _ (BoolValue False) = Right TBool
 --
 -- $ \frac{\Gamma, x : \tau_1 \vdash e : \tau_2}{\Gamma \vdash \lambda x:\tau_1 . e : \tau_1 \rightarrow \tau_2 }  \quad  \text{(T-Lam)} $
 --
-check env (Lambda name atype e) = do
-  t <- check (Map.insert name atype env) e
-  return $ TArr atype t
+check env (Lambda x t1 e) = do
+  t2 <- check (Map.insert x t1 env) e
+  return $ TArr t1 t2
 
 --
 -- $  \frac{\Gamma \vdash e_1 : \tau_1 \rightarrow \tau_2 \quad \Gamma \vdash e_2 : \tau_1}{\Gamma \vdash e_1 e_2 : \tau_2}  \quad  \text{(T-App)} $
 --
 check env (App e1 e2) = do
-  t1 <- check env e1
-  case t1 of
-    (TArr ta1 ta2) -> do
-      t2 <- check env e2
-      if ta1 == t2
-        then Right ta2
-        else Left $ "Expected " ++ (show ta1) ++ " but got : " ++ (show t2)
-    _ -> Left $ "Expected TArr but got : " ++ (show t1)
+  te1 <- check env e1
+  case te1 of
+    (TArr t1 t2) -> do
+      te2 <- check env e2
+      if t1 == te2
+        then Right t2
+        else Left $ "Expected " ++ (show t1) ++ " but got : " ++ (show te2)
+    _ -> Left $ "Expected TArr but got : " ++ (show te1)
 
 --
 -- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
 --
-check env (Var name) = find env name
+check env (Var x) = find env x
 
 find :: Environment -> Name -> Either Name Type
 find env name = maybeToEither "Var not found!" (Map.lookup name env)
