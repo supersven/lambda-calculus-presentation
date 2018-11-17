@@ -119,7 +119,7 @@ digraph untyped_lambda_calculus_ast {
     :BEAMER_env: ignoreheading
     :END:
 
-*** Meaning:
+*** Meaning
 - Identity function $(\lambda x . x)$ is applied to a variable ($y$)
 
 
@@ -179,7 +179,7 @@ digraph untyped_lambda_calculus_ast {
 \frac{Antecedent}{Conclusion} & \quad & \text{(A2)} \\ \\
 \end{align*}
 
-*** Meaning:
+*** Meaning
 - Axiom :: Rule without Precondition
 - Antecedent :: Precondition - if it's fulfilled this rule applies.
 - Conclusion :: What follows from this rule.
@@ -207,7 +207,7 @@ digraph untyped_lambda_calculus_ast {
     :BEAMER_env: ignoreheading
     :END:
 
-*** Meaning:
+*** Meaning
 - A1 :: $0$ is a natural number (by definition)
 - A2 :: The successor of a natural number is a natural number
 
@@ -261,7 +261,7 @@ digraph untyped_lambda_calculus_ast {
     :BEAMER_env: ignoreheading
     :END:
 
-*** Meaning:
+*** Meaning
 - A1 :: $0$ is a natural number (by definition)
 - A2 :: The successor of a natural number is a natural number
 - $\to$ :: Thus the successor of the successor of $0$ ($2$) must be a natural number
@@ -272,7 +272,7 @@ digraph untyped_lambda_calculus_ast {
  \frac{e_1 \to e_1'}{e_1 e_2 \to e_1' e_2} & \quad & \text{E-App1} \\ \\
 \end{align*}
 
-*** Meaning:
+*** Meaning
 - Under the condition that $e_1$ can be reduced further, do it.
 
 ** Evaluation Rules - E-App1 - Example
@@ -292,7 +292,7 @@ digraph untyped_lambda_calculus_ast {
  \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
 \end{align*}
 
-*** Meaning:
+*** Meaning
 - Under the condition that $e_2$ can be reduced further and $v_1$ is a value, do it.
 - "Bare" Untyped Lambda Calculus:
   - Only Lambdas (functions) are values.
@@ -303,19 +303,24 @@ digraph untyped_lambda_calculus_ast {
  \frac{e_2 \to e_2'}{v_1 e_2 \to v_1 e_2'} & \quad & \text{E-App2} \\ \\
 \end{align*}
 
+\vspace{-0.5cm}
 *** Example
 \begin{align*}
 & \overbrace{(\lambda x.x)}^{v_1} \ \overbrace{\alert<2->{((\lambda y.y) \ 42)}}^{e_2} \\
 \onslide<3->{\to & (\lambda x.x) \ \alert<3->{42}}
 \end{align*}
 
+\vspace{-0.5cm}
+\onslide<4->
+*** Note
+- We evaluate the parameter before applying the function: Eager Evaluation!
 
 ** Evaluation Rules - Call by Value - E-AppLam
 \begin{align*}
  {(\lambda x . e) v \to [x / v] e } & \quad & \text{E-AppLam} \\ \\
 \end{align*}
 
-*** Meaning:
+*** Meaning
 - If a lambda (function) is applied to a value, substitute that value for it's parameter.
 - "substitute" : replace it for every occurence in the lambda's body
 
@@ -428,7 +433,7 @@ digraph untyped_lambda_calculus_ast {
   --
         eval (App (App true (Var "a")) (Var "b")) `shouldBe` Var "a"
 #+END_SRC
-
+#+BEAMER: \pause
 #+BEGIN_SRC haskell :tangle test/UntypedEvalExamplesSpec.hs
   --
   -- $false \equiv \lambda p . \lambda q . q$
@@ -493,8 +498,8 @@ id a = a
 
 *** Meaning
 - \Gamma :: The Typing Environment, a list of $(Variable : Type)$ pairs (associations)
-- $x:\sigma \in \Gamma$ :: If $(x, \sigma)$ is in the Typing Environment
-- $\Gamma \vdash x:\sigma$ :: $x$ has type $\sigma$
+- Condition :: If $(x, \sigma)$ is in the Typing Environment
+- Conclusion :: $x$ has type $\sigma$
 ** Typing Rules - Variables - Example
 \begin{align*}
  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
@@ -587,7 +592,7 @@ id' i = i
 
 *** Example
 \begin{align*}
-& \overbrace{(\lambda x:Int. True)}^{e_1} \overbrace{42}^{e_2} & : & \onslide<1>{?} \onslide<3->{\overbrace{Bool}^{\tau_2}} \\ \\
+& \overbrace{(\lambda x:Int. True)}^{e_1} \overbrace{42}^{e_2} & : & \onslide<1-2>{?} \onslide<3->{\overbrace{Bool}^{\tau_2}} \\ \\
 \onslide<2->{ & \frac{\Gamma \vdash \overbrace{(\lambda x:Int. True)}^{e_1} : \overbrace{Int \rightarrow Bool}^{\tau_1 \rightarrow \tau_2} \quad \Gamma \vdash \overbrace{42}^{e_2} : \overbrace{Int}^{\tau_1}}{\Gamma \vdash \underbrace{(\lambda x:Int. True)}_{e_1} \underbrace{42}_{e_2} : \underbrace{Bool}_{\tau_2}}}
 \end{align*}  
 
