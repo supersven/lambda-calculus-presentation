@@ -715,13 +715,13 @@ check env (Lambda name atype e) = do
         check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) 
           `shouldBe` Right TInt
 #+END_SRC
-
+#+BEAMER: \pause
 #+BEGIN_SRC haskell :tangle test/TypedCheckExamplesSpec.hs
   --
   -- Does not type check: $(\lambda x:Bool . x) \ 42$
   --
-        check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) 
-          `shouldBe` Right TInt
+        check Map.empty (App (Lambda "x" TBool (Var "x")) (IntValue 5)) 
+          `shouldBe` Left "Expected TBool but got : TInt"
 #+END_SRC
 
 ** Tests

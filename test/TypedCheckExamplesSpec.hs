@@ -24,8 +24,8 @@ spec = do
 --
 -- Does not type check: $(\lambda x:Bool . x) \ 42$
 --
-      check Map.empty (App (Lambda "x" TInt (Var "x")) (IntValue 5)) 
-        `shouldBe` Right TInt
+      check Map.empty (App (Lambda "x" TBool (Var "x")) (IntValue 5)) 
+        `shouldBe` Left "Expected TBool but got : TInt"
 
 --
 -- Does not type check: $42 \ False$
