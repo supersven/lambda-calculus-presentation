@@ -186,8 +186,8 @@ digraph untyped_lambda_calculus_ast {
 
 *** Meaning
 - Axiom :: Rule without Precondition
-- Antecedent :: Precondition - if it's fulfilled this rule applies.
-- Conclusion :: What follows from this rule.
+- Antecedent :: Precondition - if it's fulfilled this rule applies
+- Conclusion :: What follows from this rule
 - A1, A2 :: Names for the rules
 
 ** Proof: 2 is a Natural Number
@@ -206,32 +206,7 @@ digraph untyped_lambda_calculus_ast {
 \frac{n : \mathtt{Nat}}{\mathtt{succ}(n) : \mathtt{Nat}} & \quad & \text{(A2)} \\ \\
 \end{align*}
 
-
-*** Underneath :B_ignoreheading:
-    :PROPERTIES:
-    :BEAMER_env: ignoreheading
-    :END:
-
-*** Meaning
-- A1 :: $0$ is a natural number (by definition)
-- A2 :: The successor of a natural number is a natural number
-
-** Proof: 2 is a Natural Number
-***  :B_columns:
-    :PROPERTIES:
-    :BEAMER_env: columns
-    :END:
-
-**** Rules                                                            :BMCOL:
-    :PROPERTIES:
-    :BEAMER_col: 0.5
-    :END:
-
-\begin{align*}
-\frac{}{0 : \mathtt{Nat}} & \quad & \text{(A1)} \\ \\
-\frac{n : \mathtt{Nat}}{\mathtt{succ}(n) : \mathtt{Nat}} & \quad & \text{(A2)} \\ \\
-\end{align*}
-
+\onslide<2->
 **** Proof                                                            :BMCOL:
     :PROPERTIES:
     :BEAMER_col: 0.5
@@ -266,9 +241,13 @@ digraph untyped_lambda_calculus_ast {
     :BEAMER_env: ignoreheading
     :END:
 
+
+\vspace{-0.5cm}
+\onslide<1->
 *** Meaning
 - A1 :: $0$ is a natural number (by definition)
 - A2 :: The successor of a natural number is a natural number
+\onslide<2->
 - $\to$ :: Thus the successor of the successor of $0$ ($2$) must be a natural number
 
 * Evaluation Rules
@@ -337,7 +316,7 @@ digraph untyped_lambda_calculus_ast {
 
 *** Example
 \begin{align*}
-& (\alert<2->{\lambda x.} \lambda y.\alert<2->{x}) \ \alert<2->{z} \\
+& \overbrace{(\alert<2->{\lambda x.} \lambda y.\alert<2->{x})}^{\lambda x.e} \ \overbrace{\alert<2->{z}}^{v} \\
 \onslide<3->{\to & \lambda y .\alert<3->{z}}
 \end{align*}
 
@@ -400,9 +379,9 @@ digraph untyped_lambda_calculus_ast {
   -- Only substitute in Lambda's body, if the parameter doesn't
   -- redefine the Name in it's scope
   --
-  substitute name substitution (Lambda varName term) =
+  substitute name substitution lambda@(Lambda varName term) =
     if name == varName
-      then Lambda varName term
+      then lambda
       else Lambda varName (substitute name substitution term)
 #+END_SRC
 
@@ -477,7 +456,7 @@ Simple types don't have parameters, no polymorphism:
 
 ** Type Safety = Progress + Preservation
 *** **Progress** :  If an expression is well typed then either it is a value, or it can be further evaluated by an available evaluation rule.
-    - A well typed (typable) program never gets "stuck".
+    - A well typed (typeable) program never gets "stuck".
 #+BEAMER: \pause
 *** **Preservation** : If an expression $e$ has type $\tau$, and is evaluated to $e'$, then $e'$ has type $\tau$.
     - $e \equiv (\lambda x: Int.x) 1$ and $e' \equiv 1$ have both the same type: =Int=
@@ -498,16 +477,17 @@ id a = a
 
 ** Typing Rules - Variables
 \begin{align*}
- \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
+ \frac{x:\tau \in \Gamma}{\Gamma \vdash x:\tau} & \quad & \text{T-Var} \\ \\
 \end{align*}  
 
 *** Meaning
 - \Gamma :: The Typing Environment, a list of $(Variable : Type)$ pairs (associations)
-- Condition :: If $(x, \sigma)$ is in the Typing Environment
-- Conclusion :: $x$ has type $\sigma$
+  - Think of a map: $Variable \mapsto Type$
+- Condition :: If $(x, \tau)$ is in the Typing Environment
+- Conclusion :: $x$ has type $\tau$
 ** Typing Rules - Variables - Example
 \begin{align*}
- \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma} & \quad & \text{T-Var} \\ \\
+ \frac{x:\tau \in \Gamma}{\Gamma \vdash x:\tau} & \quad & \text{T-Var} \\ \\
 \end{align*}  
 
 *** Example
@@ -567,8 +547,8 @@ id a = a
 *** Example
 
 \begin{align*}
-& \lambda x: \overbrace{Int}^{\tau_1} . \overbrace{x}^{e} & : & \onslide<1-2>{?} \onslide<3->{\overbrace{Int}^{\tau_1} \rightarrow \overbrace{Int}^{\tau_2} } \\ \\
-\onslide<2->{&  \frac{\Gamma, x : Int \vdash e : Int}{\Gamma \vdash \lambda x: Int . e : Int \rightarrow Int }}
+& \lambda x: \overbrace{Int}^{\tau_1} . \overbrace{x}^{e} & : & \onslide<1-2>{?} \onslide<3->{\overbrace{Int \rightarrow Int}^{\tau_1 \rightarrow \tau_2} } \\ \\
+\onslide<2->{&  \frac{\Gamma, x : \overbrace{Int}^{\tau_1} \vdash e : \overbrace{Int}^{\tau_2}}{\Gamma \vdash \lambda x: \underbrace{Int}_{\tau_1} . e : \underbrace{Int \rightarrow Int}_{\tau_1 \rightarrow \tau_2 } }}
 \end{align*}
 
 
@@ -690,7 +670,7 @@ check env (Lambda x t1 e) = do
 ** Type Checker - Variables
 #+BEGIN_SRC haskell :tangle src/TypedCheck.hs
   --
-  -- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
+  -- $  \frac{x:\tau \in \Gamma}{\Gamma \vdash x:\tau}  \quad  \text{(T-Var)} $
   --
   check env (Var x) = find env x
 

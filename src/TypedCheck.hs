@@ -41,7 +41,7 @@ check env (App e1 e2) = do
     _ -> Left $ "Expected TArr but got : " ++ (show te1)
 
 --
--- $  \frac{x:\sigma \in \Gamma}{\Gamma \vdash x:\sigma}  \quad  \text{(T-Var)} $
+-- $  \frac{x:\tau \in \Gamma}{\Gamma \vdash x:\tau}  \quad  \text{(T-Var)} $
 --
 check env (Var x) = find env x
 

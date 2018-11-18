@@ -45,7 +45,7 @@ substitute name substitution (App term1 term2) =
 -- Only substitute in Lambda's body, if the parameter doesn't
 -- redefine the Name in it's scope
 --
-substitute name substitution (Lambda varName term) =
+substitute name substitution lambda@(Lambda varName term) =
   if name == varName
-    then Lambda varName term
+    then lambda
     else Lambda varName (substitute name substitution term)
