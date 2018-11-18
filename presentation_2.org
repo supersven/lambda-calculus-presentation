@@ -10,10 +10,15 @@
 #+startup: beamer
 #+LaTeX_CLASS: beamer
 #+LaTeX_HEADER: \usemintedstyle{tango}
-#+LaTeX_HEADER: \usepackage{fontspec, xcolor, calc}
+#+LaTeX_HEADER: \usepackage{fontspec, xcolor, calc, pgfpages}
 # #+LaTeX_HEADER: \setmonofont[Contextuals={Alternate}]{Fira Code}
 #+LaTeX_HEADER: \newminted{haskell}{mathescape=true}
 #+LaTeX_HEADER: \setminted[haskell]{mathescape=true}
+
+#+LATEX_HEADER: \mode<handout>
+#+LATEX_HEADER: {
+#+LATEX_HEADER:   \pgfpagesuselayout{8 on 1}[a4paper,border shrink=5mm]
+#+LATEX_HEADER: }
 
 * Untyped Lambda Calculus
 ** Untyped Lambda Calculus - Recapitulation

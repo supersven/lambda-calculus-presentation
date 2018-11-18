@@ -1,0 +1,3 @@
+#+LATEX_CLASS_OPTIONS: [handout]
+
+#+INCLUDE: "./presentation_2.org"
