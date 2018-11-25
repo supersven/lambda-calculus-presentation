@@ -24,6 +24,7 @@ test: tangle
 .PHONY: all
 default: test dot $(PDFS)
 
+
 .PHONY: clean
 clean:
-	rm -f *.tex *.pdf
+	rm -f *.tex *.tex~ *.pdf *.aux *.log *.nav *.out *.snm *.toc *.vrb
