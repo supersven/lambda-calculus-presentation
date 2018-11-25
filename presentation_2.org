@@ -740,7 +740,8 @@ check env (Lambda x t1 e) = do
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[./good_math.jpg]]
+    
+    [[img/good_math.jpg]]
 
 *** Description                                                    :B_column:
     :PROPERTIES:
@@ -757,7 +758,7 @@ check env (Lambda x t1 e) = do
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[./types-and-programming-languages.jpg]]
+[[img/types-and-programming-languages.jpg]]
 
 *** Description                                                       :B_column:
     :PROPERTIES:
@@ -775,7 +776,7 @@ check env (Lambda x t1 e) = do
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[./write-you-a-haskell.png]]
+[[img/write-you-a-haskell.png]]
 
 *** Description                                                       :B_column:
     :PROPERTIES:
