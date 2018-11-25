@@ -48,9 +48,9 @@ There are two different ys in this expression. Reducing the expression to  (λy.
 
 There are different solutions to this problem:
 - Do a renaming phase before any evaluation to get rid of the ambiguities.
-After renaming: (λx0. λy1. x0 + y1) y0
+  - After renaming: (λx0. λy1. x0 + y1) y0
 
 - De Bruijn Indices - A clever technique that replaces the variable names with an index that describes where they were bound.
-https://en.wikipedia.org/wiki/De_Bruijn_index
+  - https://en.wikipedia.org/wiki/De_Bruijn_index
 
 Kudos & Thanks to @pheymann for spotting this bug!
