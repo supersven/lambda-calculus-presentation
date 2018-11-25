@@ -526,7 +526,7 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[img/good_math.jpg]]
+[[./img/good_math.jpg]]
 
 *** Description                                                    :B_column:
     :PROPERTIES:
@@ -542,7 +542,7 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[img/the-implementation-of-functional-programming-languages.jpg]]
+[[./img/the-implementation-of-functional-programming-languages.jpg]]
 
 *** Description                                                       :B_column:
     :PROPERTIES:
@@ -560,7 +560,7 @@ We use /Normal Order Reduction/ to reduce inside abstractions!
     :BEAMER_col: 0.3
     :BEAMER_env: column
     :END:
-[[img/types-and-programming-languages.jpg]]
+[[./img/types-and-programming-languages.jpg]]
 
 *** Description                                                       :B_column:
     :PROPERTIES:
