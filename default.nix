@@ -26,6 +26,9 @@ with import <nixpkgs> {};
               marvosym
               wasysym
               fontspec
+              xetex
+              collection-fontsrecommended
+              translator
               ;
     };
   in
@@ -33,6 +36,6 @@ with import <nixpkgs> {};
   stdenv.mkDerivation rec {
     name = "env";
     buildInputs = [
-      tex python36Packages.pygments emacs25 graphviz
+      tex python36Packages.pygments emacs25 graphviz gnumake tetex stack
     ];
 }
